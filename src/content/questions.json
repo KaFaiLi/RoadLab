@@ -1,0 +1,769 @@
+[
+  {
+    "id": "q-stop",
+    "rule": "stop",
+    "prompt": {
+      "en": "The junction is empty. What does this sign require?",
+      "zh-Hant": "路口沒有車，這個標誌要求你怎麼做？",
+      "ja": "交差点に車はいません。この標識ではどうしますか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "Stop fully and check",
+          "zh-Hant": "完全停車並確認安全",
+          "ja": "完全に停止して安全確認"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "Slow down and roll through",
+          "zh-Hant": "減速滑行通過",
+          "ja": "減速したまま通過"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "Stop only for traffic",
+          "zh-Hant": "有來車才停",
+          "ja": "車が来る時だけ停止"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "applied",
+    "status": "verified",
+    "scene": "junction"
+  },
+  {
+    "id": "q-slow",
+    "rule": "slow",
+    "prompt": {
+      "en": "How should you drive under this sign?",
+      "zh-Hant": "看到這個標誌該如何行駛？",
+      "ja": "この標識の下ではどう走りますか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "At a speed allowing an immediate stop",
+          "zh-Hant": "以能立即停車的速度",
+          "ja": "直ちに停止できる速度で"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "At exactly 30 km/h",
+          "zh-Hant": "固定時速三十公里",
+          "ja": "必ず時速30キロで"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "At the speed of the next car",
+          "zh-Hant": "跟旁車一樣快",
+          "ja": "隣の車と同じ速度で"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "basic",
+    "status": "verified"
+  },
+  {
+    "id": "q-entry",
+    "rule": "entry",
+    "prompt": {
+      "en": "Can your car enter from the signed end, with no exemption?",
+      "zh-Hant": "無適用例外時，小客車可從設標誌的一端進入嗎？",
+      "ja": "適用除外のない普通車は、標識側から入れますか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "No, choose another route",
+          "zh-Hant": "不可，改道行駛",
+          "ja": "入れないので別の道へ"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "Yes, if empty",
+          "zh-Hant": "沒車就可以",
+          "ja": "空いていればよい"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "Only at low speed",
+          "zh-Hant": "慢行就可以",
+          "ja": "徐行ならよい"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "basic",
+    "status": "verified"
+  },
+  {
+    "id": "q-oneway",
+    "rule": "oneway",
+    "prompt": {
+      "en": "Which direction is permitted on this one-way street?",
+      "zh-Hant": "這條單行道允許哪個方向？",
+      "ja": "この一方通行路で進める方向はどちらですか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "With the arrow",
+          "zh-Hant": "跟隨箭頭",
+          "ja": "矢印の方向"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "Against the arrow",
+          "zh-Hant": "逆向",
+          "ja": "矢印の逆方向"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "Either direction",
+          "zh-Hant": "雙向皆可",
+          "ja": "どちらでもよい"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "basic",
+    "status": "verified"
+  },
+  {
+    "id": "q-uturn",
+    "rule": "uturn",
+    "prompt": {
+      "en": "Which manoeuvre does this sign prohibit?",
+      "zh-Hant": "此標誌禁止哪種動作？",
+      "ja": "この標識が禁止する行為はどれですか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "A U-turn",
+          "zh-Hant": "迴轉",
+          "ja": "転回"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "Driving straight",
+          "zh-Hant": "直行",
+          "ja": "直進"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "Reducing speed",
+          "zh-Hant": "減速",
+          "ja": "減速"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "basic",
+    "status": "verified"
+  },
+  {
+    "id": "q-parking",
+    "rule": "parking",
+    "prompt": {
+      "en": "At noon, what does the 8–20 sign prohibit?",
+      "zh-Hant": "中午時，圖中「8–20」標誌禁止什麼？",
+      "ja": "正午、この「8–20」の標識が禁止するものは何ですか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "Parking",
+          "zh-Hant": "停車（駐車）",
+          "ja": "駐車"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "Left turns",
+          "zh-Hant": "左轉",
+          "ja": "左折"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "Driving through",
+          "zh-Hant": "通行",
+          "ja": "通行"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "basic",
+    "status": "verified"
+  },
+  {
+    "id": "q-rail",
+    "rule": "rail",
+    "prompt": {
+      "en": "What lies ahead of this warning sign?",
+      "zh-Hant": "此警告標誌預告前方有什麼？",
+      "ja": "この警戒標識の先にあるものは何ですか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "A railway crossing",
+          "zh-Hant": "平交道",
+          "ja": "踏切"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "A parking area",
+          "zh-Hant": "停車場",
+          "ja": "駐車場"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "A bus-only road",
+          "zh-Hant": "公車專用道",
+          "ja": "バス専用道"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "basic",
+    "status": "verified"
+  },
+  {
+    "id": "q-cross",
+    "rule": "cross",
+    "prompt": {
+      "en": "Someone is about to use this unsignalised crossing. What do you do?",
+      "zh-Hant": "有人準備走上無號誌行人穿越道，該怎麼做？",
+      "ja": "信号のない横断歩道で人が渡ろうとしています。どうしますか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "Stop and yield",
+          "zh-Hant": "停車禮讓",
+          "ja": "一時停止して譲る"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "Sound the horn and pass",
+          "zh-Hant": "鳴笛通過",
+          "ja": "警音器を鳴らして通過"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "Pass ahead of them",
+          "zh-Hant": "搶先通過",
+          "ja": "先に通過"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "applied",
+    "status": "verified",
+    "scene": "crosswalk"
+  },
+  {
+    "id": "q-town",
+    "rule": "town",
+    "prompt": {
+      "en": "What information does this sign give?",
+      "zh-Hant": "此標誌提供什麼資訊？",
+      "ja": "この標識は何を案内しますか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "Municipality name",
+          "zh-Hant": "市町村名稱",
+          "ja": "市町村名"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "Maximum speed",
+          "zh-Hant": "最高速度",
+          "ja": "最高速度"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "Parking hours",
+          "zh-Hant": "停車時段",
+          "ja": "駐車可能時間"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "basic",
+    "status": "verified"
+  },
+  {
+    "id": "q-hours",
+    "rule": "hours",
+    "prompt": {
+      "en": "What does the 8–20 plate below a main sign specify?",
+      "zh-Hant": "主標誌下方的「8–20」附牌表示什麼？",
+      "ja": "本標識の下の「8–20」は何を表しますか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "Applicable hours",
+          "zh-Hant": "適用時段",
+          "ja": "適用時間"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "Road width",
+          "zh-Hant": "道路寬度",
+          "ja": "道路幅"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "Distance ahead",
+          "zh-Hant": "前方距離",
+          "ja": "前方までの距離"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "basic",
+    "status": "verified"
+  },
+  {
+    "id": "q-deer",
+    "rule": "deer",
+    "prompt": {
+      "en": "What hazard does the deer sign indicate?",
+      "zh-Hant": "鹿的圖案提醒哪種危險？",
+      "ja": "シカの標識が知らせる危険は何ですか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "Wildlife entering the road",
+          "zh-Hant": "野生動物進入道路",
+          "ja": "動物の飛び出し"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "A mandatory stop",
+          "zh-Hant": "必須停車",
+          "ja": "一時停止義務"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "A closed road",
+          "zh-Hant": "道路封閉",
+          "ja": "通行止め"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "basic",
+    "status": "verified"
+  },
+  {
+    "id": "q-railstop",
+    "rule": "railstop",
+    "prompt": {
+      "en": "The railway alarm is silent. There is no traffic signal. What now?",
+      "zh-Hant": "平交道警報未響，也無交通號誌，該怎麼做？",
+      "ja": "交通信号機のない踏切で警報は鳴っていません。どうしますか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "Stop and check for trains",
+          "zh-Hant": "停車確認有無列車",
+          "ja": "一時停止して列車を確認"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "Continue because it is quiet",
+          "zh-Hant": "安靜就通過",
+          "ja": "静かなのでそのまま通過"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "Follow the car ahead without stopping",
+          "zh-Hant": "不停車跟隨前車",
+          "ja": "止まらず前車に続く"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "applied",
+    "status": "verified",
+    "scene": "tracks"
+  },
+  {
+    "id": "q-red",
+    "rule": "red",
+    "prompt": {
+      "en": "A steady red light, no arrow, no officer. May you turn left?",
+      "zh-Hant": "紅燈、無箭頭且無員警指揮，可左轉嗎？",
+      "ja": "赤信号で矢印も警察官の指示もありません。左折できますか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "Wait at the signal",
+          "zh-Hant": "停車等候",
+          "ja": "停止して待つ"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "Turn after slowing",
+          "zh-Hant": "減速後左轉",
+          "ja": "徐行して左折"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "Turn if no pedestrians",
+          "zh-Hant": "沒行人就轉",
+          "ja": "歩行者がいなければ左折"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "applied",
+    "status": "verified",
+    "scene": "lights"
+  },
+  {
+    "id": "q-lane",
+    "rule": "lane",
+    "prompt": {
+      "en": "Before the junction, which marked lane should you choose to go straight?",
+      "zh-Hant": "要直行時，應在路口前選擇哪個指定車道？",
+      "ja": "直進するとき、交差点の手前でどの指定車線を選びますか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "A lane marked for straight travel",
+          "zh-Hant": "標示可直行的車道",
+          "ja": "直進できる車線"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "A right-turn-only lane",
+          "zh-Hant": "右轉專用道",
+          "ja": "右折専用車線"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "Any lane with less traffic",
+          "zh-Hant": "車輛較少的任意車道",
+          "ja": "空いている車線ならどこでも"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "applied",
+    "status": "verified",
+    "scene": "lanes"
+  },
+  {
+    "id": "q-left",
+    "rule": "left",
+    "prompt": {
+      "en": "After turning onto an ordinary two-way road, which side do you use?",
+      "zh-Hant": "轉入一般雙向道路後應靠哪側行駛？",
+      "ja": "通常の対面通行路に曲がった後、どちら側を走りますか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "Left",
+          "zh-Hant": "左側",
+          "ja": "左側"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "Right",
+          "zh-Hant": "右側",
+          "ja": "右側"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "Either side",
+          "zh-Hant": "任一側",
+          "ja": "どちら側でもよい"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "basic",
+    "status": "verified"
+  },
+  {
+    "id": "q-report",
+    "rule": "report",
+    "prompt": {
+      "en": "Two cars collide. Nobody is hurt. Who must be notified?",
+      "zh-Hant": "兩車碰撞，無人受傷，仍須通知誰？",
+      "ja": "車同士が衝突し、けが人はいません。どこに報告しますか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "Police, on 110",
+          "zh-Hant": "警察，撥打一一〇",
+          "ja": "警察に110番"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "Only the insurer",
+          "zh-Hant": "僅通知保險公司",
+          "ja": "保険会社だけ"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "Nobody",
+          "zh-Hant": "無須通知",
+          "ja": "どこにも不要"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "basic",
+    "status": "verified"
+  },
+  {
+    "id": "q-ice",
+    "rule": "ice",
+    "prompt": {
+      "en": "A winter road looks wet and shiny. What might you be seeing?",
+      "zh-Hant": "冬天路面看似濕潤發亮，可能是什麼？",
+      "ja": "冬に路面がぬれたように黒く光っています。何が考えられますか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "A thin layer of ice",
+          "zh-Hant": "薄冰",
+          "ja": "薄い氷"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "Guaranteed dry asphalt",
+          "zh-Hant": "一定是乾燥柏油",
+          "ja": "確実に乾いた舗装"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "Heated pavement for certain",
+          "zh-Hant": "一定有路面加熱",
+          "ja": "必ず融雪設備がある"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "applied",
+    "status": "verified",
+    "scene": "ice"
+  },
+  {
+    "id": "q-snow",
+    "rule": "snow",
+    "prompt": {
+      "en": "A truck throws up powder snow. Visibility drops. What helps?",
+      "zh-Hant": "貨車揚起粉雪，能見度下降，該如何應對？",
+      "ja": "トラックが雪を巻き上げて視界が悪化しました。どうしますか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "Ease off and reduce speed",
+          "zh-Hant": "放鬆油門並減速",
+          "ja": "アクセルを緩めて減速"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "Accelerate past the snow",
+          "zh-Hant": "加速衝出雪霧",
+          "ja": "加速して抜ける"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "Close the gap to the truck",
+          "zh-Hant": "緊跟貨車",
+          "ja": "トラックに接近"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "applied",
+    "status": "verified",
+    "scene": "blizzard"
+  },
+  {
+    "id": "q-distance",
+    "rule": "distance",
+    "prompt": {
+      "en": "What adjustment helps on packed snow?",
+      "zh-Hant": "壓實積雪路面上，哪項調整有幫助？",
+      "ja": "圧雪路ではどんな調整が役立ちますか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "Leave a larger following gap",
+          "zh-Hant": "拉大跟車距離",
+          "ja": "車間距離を広げる"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "Follow more closely",
+          "zh-Hant": "縮短車距",
+          "ja": "車間距離を詰める"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "Use late, sharp braking",
+          "zh-Hant": "到最後才急煞",
+          "ja": "遅めに急ブレーキ"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "basic",
+    "status": "verified"
+  },
+  {
+    "id": "q-abs",
+    "rule": "abs",
+    "prompt": {
+      "en": "When reserving your first winter rental, what does the leaflet recommend?",
+      "zh-Hant": "第一次在冬季租車，手冊建議確認什麼？",
+      "ja": "初めて冬道用に車を借りるとき、資料が勧める確認は何ですか。"
+    },
+    "options": [
+      {
+        "id": "a",
+        "text": {
+          "en": "Ask about ABS equipment",
+          "zh-Hant": "確認是否配備 ABS",
+          "ja": "ABS装備を確認"
+        }
+      },
+      {
+        "id": "b",
+        "text": {
+          "en": "Assume ice has no effect with ABS",
+          "zh-Hant": "認為 ABS 可消除冰面影響",
+          "ja": "ABSがあれば氷の影響はないと考える"
+        }
+      },
+      {
+        "id": "c",
+        "text": {
+          "en": "Choose by colour alone",
+          "zh-Hant": "只依車色選擇",
+          "ja": "色だけで選ぶ"
+        }
+      }
+    ],
+    "correct": "a",
+    "difficulty": "basic",
+    "status": "verified"
+  }
+]

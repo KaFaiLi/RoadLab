@@ -1,0 +1,444 @@
+[
+  {
+    "id": "stop",
+    "category": "regulatory",
+    "name": {
+      "en": "Stop",
+      "zh-Hant": "停車再開",
+      "ja": "一時停止"
+    },
+    "meaning": {
+      "en": "At an uncontrolled junction with this sign, stop fully before the stop line and check both ways.",
+      "zh-Hant": "在無號誌路口遇此標誌，須於停止線前完全停車，確認左右安全。",
+      "ja": "信号のない交差点でこの標識があるときは、停止線の直前で一時停止し、左右の安全を確認します。"
+    },
+    "section": "p. 1; p. 2 §8",
+    "source": "npa",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Japan",
+    "status": "verified",
+    "kind": "rule",
+    "asset": "stop",
+    "attribution": "国土交通省「道路標識一覧」 · RoadLab crop · PDL 1.0"
+  },
+  {
+    "id": "slow",
+    "category": "regulatory",
+    "name": {
+      "en": "Proceed slowly",
+      "zh-Hant": "慢行",
+      "ja": "徐行"
+    },
+    "meaning": {
+      "en": "Proceed at a speed that allows an immediate stop. The NPA describes 10 km/h or less as a guide.",
+      "zh-Hant": "應以能立即停車的速度行駛。警察廳以時速十公里以下作為參考。",
+      "ja": "直ちに停止できる速度で進みます。警察庁の目安は時速10キロ以下です。"
+    },
+    "section": "p. 1 · slow",
+    "source": "npa",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Japan",
+    "status": "verified",
+    "kind": "rule",
+    "asset": "slow",
+    "attribution": "国土交通省「道路標識一覧」 · RoadLab crop · PDL 1.0"
+  },
+  {
+    "id": "entry",
+    "category": "regulatory",
+    "name": {
+      "en": "No entry",
+      "zh-Hant": "禁止駛入",
+      "ja": "車両進入禁止"
+    },
+    "meaning": {
+      "en": "An ordinary car cannot enter from the signed direction when no exemption applies.",
+      "zh-Hant": "無適用例外時，一般小客車不得從設有標誌的一側駛入。",
+      "ja": "適用除外がなければ、普通車は標識のある方向から進入できません。"
+    },
+    "section": "p. 1 · no entry",
+    "source": "npa",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Japan",
+    "status": "verified",
+    "kind": "rule",
+    "asset": "entry",
+    "attribution": "国土交通省「道路標識一覧」 · RoadLab crop · PDL 1.0"
+  },
+  {
+    "id": "oneway",
+    "category": "regulatory",
+    "name": {
+      "en": "One way",
+      "zh-Hant": "單行道",
+      "ja": "一方通行"
+    },
+    "meaning": {
+      "en": "An ordinary car must follow the arrow on this one-way street, assuming no exemption.",
+      "zh-Hant": "無適用例外時，小客車須依箭頭方向行駛。",
+      "ja": "適用除外がなければ、普通車は矢印の方向にのみ通行できます。"
+    },
+    "section": "p. 1 · one-way",
+    "source": "npa",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Japan",
+    "status": "verified",
+    "kind": "rule",
+    "asset": "oneway",
+    "attribution": "国土交通省「道路標識一覧」 · RoadLab crop · PDL 1.0"
+  },
+  {
+    "id": "uturn",
+    "category": "regulatory",
+    "name": {
+      "en": "No U-turn",
+      "zh-Hant": "禁止迴轉",
+      "ja": "転回禁止"
+    },
+    "meaning": {
+      "en": "This sign prohibits a U-turn within its applicable section and time.",
+      "zh-Hant": "在標誌適用的路段與時間內禁止迴轉。",
+      "ja": "標識が適用される区間・時間は転回できません。"
+    },
+    "section": "p. 1 · U-turns",
+    "source": "npa",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Japan",
+    "status": "verified",
+    "kind": "rule",
+    "asset": "uturn",
+    "attribution": "国土交通省「道路標識一覧」 · RoadLab crop · PDL 1.0"
+  },
+  {
+    "id": "parking",
+    "category": "regulatory",
+    "name": {
+      "en": "No parking",
+      "zh-Hant": "禁止停車",
+      "ja": "駐車禁止"
+    },
+    "meaning": {
+      "en": "Parking is prohibited during the displayed hours, here 08–20. Other rules may apply at any time.",
+      "zh-Hant": "圖示時段八時至二十時禁止停車，其他規定仍可能適用。",
+      "ja": "図の8時から20時までは駐車禁止です。他の規制も確認します。"
+    },
+    "section": "p. 1 · no parking; MLIT 316",
+    "source": "npa",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Japan",
+    "status": "verified",
+    "kind": "rule",
+    "asset": "parking",
+    "attribution": "国土交通省「道路標識一覧」 · RoadLab crop · PDL 1.0"
+  },
+  {
+    "id": "rail",
+    "category": "warning",
+    "name": {
+      "en": "Railway crossing ahead",
+      "zh-Hant": "前方鐵路平交道",
+      "ja": "踏切あり"
+    },
+    "meaning": {
+      "en": "This warning identifies a railway crossing ahead. It does not report whether a train is coming.",
+      "zh-Hant": "此標誌預告前方有平交道，並未指示列車是否接近。",
+      "ja": "前方に踏切があることを知らせます。列車の接近状況を示すものではありません。"
+    },
+    "section": "p. 1 · railroad crossing",
+    "source": "npa",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Japan",
+    "status": "verified",
+    "kind": "information",
+    "asset": "rail",
+    "attribution": "国土交通省「道路標識一覧」 · RoadLab crop · PDL 1.0"
+  },
+  {
+    "id": "cross",
+    "category": "indication",
+    "name": {
+      "en": "Pedestrian crossing",
+      "zh-Hant": "行人穿越道",
+      "ja": "横断歩道"
+    },
+    "meaning": {
+      "en": "At an unsignalised crossing, stop and yield when a pedestrian is about to cross.",
+      "zh-Hant": "在無號誌行人穿越道遇行人正要穿越，須停車禮讓。",
+      "ja": "信号のない横断歩道で歩行者が渡ろうとしているときは、一時停止して道を譲ります。"
+    },
+    "section": "p. 2 §5",
+    "source": "npa",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Japan",
+    "status": "verified",
+    "kind": "rule",
+    "asset": "cross",
+    "attribution": "国土交通省「道路標識一覧」 · RoadLab crop · PDL 1.0"
+  },
+  {
+    "id": "town",
+    "category": "guide",
+    "name": {
+      "en": "Municipality",
+      "zh-Hant": "市町村名稱",
+      "ja": "市町村"
+    },
+    "meaning": {
+      "en": "The sign identifies a municipality. The illustrated example reads Onsen Town.",
+      "zh-Hant": "此標誌標示市町村名稱，圖例為溫泉町。",
+      "ja": "市町村名を案内します。図の例は温泉町です。"
+    },
+    "section": "101 市町村",
+    "source": "mlit",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Japan",
+    "status": "verified",
+    "kind": "information",
+    "asset": "town",
+    "attribution": "国土交通省「道路標識一覧」 · RoadLab crop · PDL 1.0"
+  },
+  {
+    "id": "hours",
+    "category": "supplementary",
+    "name": {
+      "en": "Days and hours",
+      "zh-Hant": "日期與時段",
+      "ja": "日・時間"
+    },
+    "meaning": {
+      "en": "A time plate qualifies the main sign. This example shows 08:00 to 20:00.",
+      "zh-Hant": "時間附牌補充主標誌的適用時段，此例為八時至二十時。",
+      "ja": "時間の補助標識は本標識の適用時間を示します。例は8時から20時までです。"
+    },
+    "section": "502 日・時間",
+    "source": "mlit",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Japan",
+    "status": "verified",
+    "kind": "information",
+    "asset": "hours",
+    "attribution": "国土交通省「道路標識一覧」 · RoadLab crop · PDL 1.0"
+  },
+  {
+    "id": "deer",
+    "category": "warning",
+    "name": {
+      "en": "Animals may cross",
+      "zh-Hant": "注意動物出沒",
+      "ja": "動物が飛び出すおそれあり"
+    },
+    "meaning": {
+      "en": "This warning alerts drivers to animals entering the road. The deer illustration is one example.",
+      "zh-Hant": "此標誌提醒駕駛注意動物突然進入道路，鹿為其中一種圖例。",
+      "ja": "動物が道路に飛び出すおそれを示します。シカの絵はその一例です。"
+    },
+    "section": "214の2",
+    "source": "mlit",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Japan",
+    "status": "verified",
+    "kind": "information",
+    "asset": "deer",
+    "attribution": "国土交通省「道路標識一覧」 · RoadLab crop · PDL 1.0"
+  },
+  {
+    "id": "railstop",
+    "category": "obligation",
+    "name": {
+      "en": "Rail crossing procedure",
+      "zh-Hant": "平交道通行",
+      "ja": "踏切での一時停止"
+    },
+    "meaning": {
+      "en": "At a railway crossing without a traffic signal, stop and check for trains even if the alarm is silent.",
+      "zh-Hant": "沒有交通號誌控制的平交道，即使警報未響也須停車確認來車。",
+      "ja": "交通信号機のない踏切では、警報が鳴っていなくても一時停止して列車を確認します。"
+    },
+    "section": "p. 2 §4",
+    "source": "npa",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Japan",
+    "status": "verified",
+    "kind": "rule"
+  },
+  {
+    "id": "red",
+    "category": "signal",
+    "name": {
+      "en": "Red light",
+      "zh-Hant": "紅燈",
+      "ja": "赤信号"
+    },
+    "meaning": {
+      "en": "With a steady red light and no illuminated arrow or police direction, stop. A left turn also waits.",
+      "zh-Hant": "紅燈且無亮起的箭頭或員警指揮時須停車，左轉也須等待。",
+      "ja": "赤信号で矢印の点灯も警察官の指示もないときは停止します。左折も待ちます。"
+    },
+    "section": "p. 1 · red signal",
+    "source": "npa",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Japan",
+    "status": "verified",
+    "kind": "rule"
+  },
+  {
+    "id": "lane",
+    "category": "marking",
+    "name": {
+      "en": "Lane direction",
+      "zh-Hant": "車道行駛方向",
+      "ja": "進行方向別通行区分"
+    },
+    "meaning": {
+      "en": "Where lanes are designated by direction at a junction, use the lane for your intended movement.",
+      "zh-Hant": "路口設有車道方向指定時，應使用符合行駛方向的車道。",
+      "ja": "交差点で進行方向別の通行区分が指定されているときは、進む方向に対応した車線を通行します。"
+    },
+    "section": "p. 1 · designated lanes",
+    "source": "npa",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Japan",
+    "status": "verified",
+    "kind": "rule"
+  },
+  {
+    "id": "left",
+    "category": "obligation",
+    "name": {
+      "en": "Keep left",
+      "zh-Hant": "靠左行駛",
+      "ja": "左側通行"
+    },
+    "meaning": {
+      "en": "In ordinary two-way traffic in Japan, vehicles travel on the left side of the road.",
+      "zh-Hant": "日本一般雙向道路上，車輛靠左行駛。",
+      "ja": "日本の通常の対面通行の道路では左側を走行します。"
+    },
+    "section": "p. 2 §1",
+    "source": "npa",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Japan",
+    "status": "verified",
+    "kind": "rule"
+  },
+  {
+    "id": "report",
+    "category": "obligation",
+    "name": {
+      "en": "Crash reporting",
+      "zh-Hant": "交通事故通報",
+      "ja": "交通事故の報告"
+    },
+    "meaning": {
+      "en": "Report traffic crashes to the police on 110 even when nobody is injured.",
+      "zh-Hant": "即使無人受傷，發生交通事故也要撥打一一〇報警。",
+      "ja": "負傷者がいなくても交通事故は110番で警察に報告します。"
+    },
+    "section": "p. 2 §2",
+    "source": "npa",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Japan",
+    "status": "verified",
+    "kind": "rule"
+  },
+  {
+    "id": "ice",
+    "category": "winter",
+    "name": {
+      "en": "Black ice",
+      "zh-Hant": "暗冰",
+      "ja": "ブラックアイスバーン"
+    },
+    "meaning": {
+      "en": "A dark, shiny road in winter may be coated in refrozen water and extremely slippery.",
+      "zh-Hant": "冬季深色發亮的路面可能覆有再度結冰的薄冰，非常濕滑。",
+      "ja": "冬の黒く光る路面は再凍結した薄い氷に覆われ、とても滑りやすいことがあります。"
+    },
+    "section": "p. 1 · black icy roads",
+    "source": "winter",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Hokkaido",
+    "status": "verified",
+    "kind": "guidance"
+  },
+  {
+    "id": "snow",
+    "category": "winter",
+    "name": {
+      "en": "Blowing snow",
+      "zh-Hant": "吹雪",
+      "ja": "地吹雪"
+    },
+    "meaning": {
+      "en": "Blown snow can suddenly hide the road. Reduce speed as visibility falls.",
+      "zh-Hant": "風雪會突然遮蔽道路，視線變差時應減速。",
+      "ja": "舞い上がった雪で突然見えにくくなることがあります。視界に応じて速度を落としましょう。"
+    },
+    "section": "p. 1 · visibility",
+    "source": "winter",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Hokkaido",
+    "status": "verified",
+    "kind": "guidance"
+  },
+  {
+    "id": "distance",
+    "category": "winter",
+    "name": {
+      "en": "Winter following distance",
+      "zh-Hant": "冬季跟車距離",
+      "ja": "冬道の車間距離"
+    },
+    "meaning": {
+      "en": "Allow extra following distance on slippery roads for time to react and slow down.",
+      "zh-Hant": "濕滑路面要加大車距，留出反應與減速時間。",
+      "ja": "滑りやすい路面では反応や減速の時間を確保するため、車間距離に余裕を持ちます。"
+    },
+    "section": "p. 1 · three key points",
+    "source": "winter",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Hokkaido",
+    "status": "verified",
+    "kind": "guidance"
+  },
+  {
+    "id": "abs",
+    "category": "winter",
+    "name": {
+      "en": "Rental-car ABS",
+      "zh-Hant": "租車的防鎖死煞車系統",
+      "ja": "レンタカーのABS"
+    },
+    "meaning": {
+      "en": "The Hokkaido leaflet advises first-time winter renters to ask for ABS. Ice can still lengthen braking distances.",
+      "zh-Hant": "北海道手冊建議首次冬季租車時確認配備 ABS。冰面仍會延長煞車距離。",
+      "ja": "北海道の資料は冬道が初めての利用者にABS装備車を勧めています。氷上では制動距離が延びることがあります。"
+    },
+    "section": "p. 1 · rental car quick tip",
+    "source": "winter",
+    "checked": "2026-11-22",
+    "vehicle": "passenger-car",
+    "region": "Hokkaido",
+    "status": "verified",
+    "kind": "guidance"
+  }
+]
