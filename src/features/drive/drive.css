@@ -1,0 +1,198 @@
+.driving {
+  max-width: 1060px;
+  margin: auto;
+}
+.drive-head,
+.drive-brief,
+.drive-controls,
+.drive-hud,
+.drive-hud > div {
+  display: flex;
+  align-items: center;
+}
+.drive-head,
+.drive-brief,
+.drive-hud {
+  justify-content: space-between;
+  gap: 16px;
+}
+.drive-head h1 {
+  margin: 5px 0 15px;
+}
+.drive-secondary {
+  border: 1px solid #a5b6a3;
+  padding: 9px 17px;
+  border-radius: 9px;
+  min-height: 44px;
+}
+.windshield {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 16px 16px 5px 5px;
+  background: #8eb9bf;
+}
+.windshield canvas {
+  width: 100%;
+  height: clamp(270px, 49vw, 510px);
+  display: block;
+}
+.drive-hud {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 12px;
+  align-items: flex-start;
+  pointer-events: none;
+}
+.drive-hud > div,
+.drive-hud strong {
+  border-radius: 8px;
+  background: #193a34ed;
+  color: #fff6dc;
+  padding: 9px 12px;
+  font-size: clamp(12px, 1.6vw, 16px);
+}
+.drive-hud > div {
+  gap: 9px;
+}
+.drive-hud i {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e7be7c;
+}
+.drive-hud strong {
+  white-space: nowrap;
+  font-family: monospace;
+}
+.drive-shade {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #213b3555;
+}
+.driving > progress {
+  display: block;
+  height: 6px;
+  margin: 5px 0 14px;
+}
+.drive-brief,
+.drive-controls {
+  padding: 16px;
+  border: 1px solid #ced7c7;
+  border-radius: 12px;
+  background: #fffdf5;
+}
+.drive-brief p {
+  max-width: 650px;
+}
+.drive-brief h2 {
+  margin: 0 0 6px;
+}
+.drive-brief .button {
+  flex-shrink: 0;
+}
+.drive-source {
+  text-decoration: underline;
+  font-size: 13px;
+}
+.drive-controls {
+  gap: 10px;
+}
+.pedal {
+  display: grid;
+  place-items: center;
+  min-width: 80px;
+  min-height: 56px;
+  border-radius: 8px;
+  background: #e8eddf;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  color: #294738;
+}
+.pedal b {
+  font-size: 24px;
+  line-height: 1;
+}
+.pedal span {
+  font-size: 12px;
+  font-weight: 650;
+}
+.pedal.brake {
+  margin-left: auto;
+  background: #ece0ce;
+}
+.pedal.gas {
+  background: #2d5842;
+  color: white;
+}
+.pedal:active {
+  box-shadow: inset 0 0 0 4px #daa252;
+}
+.drive-help {
+  margin-top: 10px;
+  color: #55695d;
+  font-size: 13px;
+}
+@media (max-width: 540px) {
+  .drive-head h1 {
+    font-size: 29px;
+  }
+  .drive-brief {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .drive-hud {
+    left: 7px;
+    right: 7px;
+    top: 7px;
+    gap: 5px;
+  }
+  .drive-hud strong,
+  .drive-hud > div {
+    padding: 7px 8px;
+  }
+  .drive-controls {
+    padding: 7px;
+    gap: 6px;
+  }
+  .pedal {
+    min-width: 0;
+    flex: 1;
+  }
+  .pedal span {
+    font-size: 11px;
+  }
+  .drive-help {
+    margin: 8px 0;
+  }
+  .windshield canvas {
+    height: clamp(250px, 37svh, 370px);
+  }
+}
+@media (max-height: 510px) and (orientation: landscape) {
+  main:has(.driving) {
+    padding: 6px 0;
+  }
+  .driving .drive-head h1 {
+    font-size: 20px;
+  }
+  .driving .drive-head h1,
+  .driving .drive-head small {
+    margin: 0;
+  }
+  .windshield canvas {
+    height: 50svh;
+  }
+  .drive-controls {
+    padding: 4px;
+  }
+  .pedal {
+    min-height: 44px;
+  }
+}

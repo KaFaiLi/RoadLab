@@ -26,8 +26,8 @@ export function Home({ t, data }: { t: T; data: History }) {
             <em>{t("hero2")}</em>
           </h1>
           <p>{t("intro")}</p>
-          <a className="button warm" href="#/learn">
-            {t("start")} <Icon name="arrow" />
+          <a className="button warm" href="#/drive">
+            {t("driveTitle")} <Icon name="arrow" />
           </a>
         </div>
       </section>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Icon, type IconName } from "./components/Icon";
 import { type Mode, type T } from "./components/Shared";
 import { locales, type Locale } from "./content/schema";
@@ -8,6 +8,7 @@ import { Game } from "./features/Game";
 import { Home } from "./features/Home";
 import { Progress } from "./features/Progress";
 import { read, save } from "./lib/game";
+const Drive = lazy(() => import("./features/drive/Drive"));
 const route = () => location.hash.replace(/^#\/?/, "") || "home";
 export default function App() {
   const [initial] = useState(read),
@@ -72,7 +73,11 @@ export default function App() {
       </header>
       <main>
         {error && <p role="alert">{t("storage")}</p>}
-        {page === "catalogue" ? (
+        {page === "drive" ? (
+          <Suspense fallback={<p>{t("driveTitle")}…</p>}>
+            <Drive l={l} />
+          </Suspense>
+        ) : page === "catalogue" ? (
           <Catalogue {...props} />
         ) : page === "progress" ? (
           <Progress {...props} update={setData} />

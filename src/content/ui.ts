@@ -1,5 +1,6 @@
 import { tr } from "./schema";
 export const ui = {
+  driveTitle: tr("3D Driving School", "3D 駕駛教室", "3Dドライビングスクール"),
   home: tr("Dashboard", "學習總覽", "ダッシュボード"),
   catalogue: tr("Catalogue", "圖鑑", "図鑑"),
   progress: tr("Progress", "學習進度", "学習記録"),
