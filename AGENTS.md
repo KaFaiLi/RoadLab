@@ -16,3 +16,5 @@ Read the official source and the relevant passage before setting a rule or quest
 ## Release gate
 
 Run the local commands in README.md. Check unique IDs, option and scene references, locale completeness, source metadata and artwork credits. Review each sign image against the source. Exercise locale switching, learning, assessment, error review, progress after reload and the production subpath on desktop and mobile. Confirm keyboard operation, visible focus and readable narrow-screen layouts. Keep GitHub Pages deployment gated by the quality job on main.
+
+The first-person driving mode lives in src/features/drive. simulation.ts updates the car and checkpoint rules in metres and seconds. world.ts builds the meshes, render.ts projects them from the driver's seat, and Drive.tsx manages input, pause and the animation lifecycle. Run the drive-through simulation test and the production browser smoke test when changing controls, geometry or course goals.

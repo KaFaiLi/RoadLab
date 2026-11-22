@@ -39,3 +39,9 @@ The browser suite serves the production build and exercises Chromium desktop, An
 ## Content and assets
 
 The app ships all content and artwork locally. Each published item links to its source. The scenic illustrations are original RoadLab SVG drawings. The sign images were cropped from MLIT’s official inventory under Japan's Public Data License 1.0. Attribution and outstanding coverage are recorded in [content coverage](docs/content-coverage.md). The [implementation plan](docs/implementation-plan.md), [roadmap](docs/roadmap.md) and [contributor guide](AGENTS.md) describe the code and editorial process.
+
+## First-person driving
+
+Choose **3D Driving School** on the dashboard or open `#/drive`. Drive a right-hand-drive car through a 150 m Japanese town course. Follow the left lane, stop before the marked line, let the pedestrian cross and reach the green finish gate. Hold the arrow keys or WASD to steer, accelerate and brake. The on-screen controls support simultaneous steering and pedal input. Pause with Escape or the Pause button. Losing window focus pauses the simulation.
+
+The town uses original polygon meshes, a moving perspective camera and a Canvas 2D rasterizer. Shadows, traffic and handling are simplified for this introductory course. A completed or failed drive can be replayed and does not affect quiz scores.
