@@ -48,3 +48,31 @@ test("enter the cockpit, drive with held controls, pause and resume", async ({
     page.getByRole("heading", { name: "3Dドライビングスクール" }),
   ).toBeVisible();
 });
+
+test("select independent urban turns, see matching vehicle and walk greens, and change routes while paused", async ({
+  page,
+}) => {
+  await page.goto("./#/drive");
+  await page.locator(".language select").selectOption("en");
+  const route = page.getByLabel("Driving route");
+  await route.selectOption("market");
+  await expect(
+    page.getByText("Turn left into the market street."),
+  ).toBeVisible();
+  await route.selectOption("avenue");
+  await expect(
+    page.getByText("Turn right across the opposing lane."),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Start driving" }).click();
+  await expect(route).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Look right" })).toBeVisible();
+  await expect(page.locator(".signal-strip .lens.green")).toHaveCount(3, {
+    timeout: 24000,
+  });
+  await page.getByRole("button", { name: /Pause/ }).click();
+  await route.selectOption("station");
+  await expect(
+    page.getByRole("button", { name: "Start driving" }),
+  ).toBeVisible();
+  await expect(page.locator(".signal-strip .lens.red")).toHaveCount(3);
+});
