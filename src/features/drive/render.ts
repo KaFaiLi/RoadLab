@@ -1,5 +1,7 @@
 import { course, pedestrianX, roadX, type Car } from "./simulation";
 import { box, type Face, type V } from "./world";
+import { urbanActors } from "./urbanWorld";
+import { junction, type RouteId } from "./urban";
 type Point = [number, number];
 function polygon(ctx: CanvasRenderingContext2D, p: Point[], color: string) {
   ctx.beginPath();
@@ -14,6 +16,8 @@ export function render(
   h: number,
   car: Car,
   world: Face[],
+  route: RouteId = "town",
+  look = 0,
 ) {
   const sky = ctx.createLinearGradient(0, 0, 0, h * 0.62);
   sky.addColorStop(0, "#78b4c7");
@@ -22,15 +26,15 @@ export function render(
   ctx.fillRect(0, 0, w, h);
   const horizon = h * 0.43,
     focal = Math.min(w * 0.88, h * 1.32);
-  const sin = Math.sin(car.yaw),
-    cos = Math.cos(car.yaw);
-  const cameraX = car.x + 0.36 * cos,
-    cameraZ = car.z - 0.36 * sin;
+  const sin = Math.sin(car.yaw + look),
+    cos = Math.cos(car.yaw + look);
+  const cameraX = car.x + 0.36 * Math.cos(car.yaw),
+    cameraZ = car.z - 0.36 * Math.sin(car.yaw);
   for (let row = 0; row < 2; row++) {
     const pts: Point[] = [[0, horizon + 2]];
     for (let i = 0; i <= 80; i++) {
       const x = (i * w) / 80,
-        t = x / focal + car.yaw + row * 0.76;
+        t = x / focal + car.yaw + look + row * 0.76;
       pts.push([
         x,
         horizon -
@@ -64,23 +68,29 @@ export function render(
     ctx.fillStyle = "#fff9e8";
     ctx.fillText(text, sx, sy);
   }
-  const px = pedestrianX(car),
-    pz = course.crossing + 0.4,
-    walk =
-      car.pedTime > 0 && car.pedTime < 5 ? Math.sin(car.pedTime * 8) * 0.16 : 0;
-  const ped = [
-    ...box(px, 0.83, pz, 0.44, 0.58, 0.29, "#c36f43"),
-    ...box(px, 1.41, pz, 0.27, 0.29, 0.25, "#d8aa82"),
-    ...box(px, 1.65, pz, 0.3, 0.095, 0.27, "#514c42"),
-    ...box(px - 0.12 - walk, 0, pz, 0.15, 0.84, 0.19, "#455764"),
-    ...box(px + 0.12 + walk, 0, pz, 0.15, 0.84, 0.19, "#455764"),
-  ];
+  function townPedestrian() {
+    const px = pedestrianX(car),
+      pz = course.crossing + 0.4,
+      walk =
+        car.pedTime > 0 && car.pedTime < 5
+          ? Math.sin(car.pedTime * 8) * 0.16
+          : 0;
+    return [
+      ...box(px, 0.83, pz, 0.44, 0.58, 0.29, "#c36f43"),
+      ...box(px, 1.41, pz, 0.27, 0.29, 0.25, "#d8aa82"),
+      ...box(px, 1.65, pz, 0.3, 0.095, 0.27, "#514c42"),
+      ...box(px - 0.12 - walk, 0, pz, 0.15, 0.84, 0.19, "#455764"),
+      ...box(px + 0.12 + walk, 0, pz, 0.15, 0.84, 0.19, "#455764"),
+    ];
+  }
+  const actors =
+    route === "town" ? townPedestrian() : urbanActors(route, car.elapsed);
   const faces: { p: Point[]; depth: number; color: string; layer: number }[] =
     [];
-  for (const item of [...world, ...ped]) {
+  for (const item of [...world, ...actors]) {
     if (
       item.v.every((v) => v[2] > car.z + 125) ||
-      item.v.every((v) => v[2] < car.z - 18)
+      item.v.every((v) => v[2] < car.z - 125)
     )
       continue;
     const vertices = item.v.map(camera);
@@ -115,8 +125,32 @@ export function render(
   }
   faces.sort((a, b) => a.layer - b.layer || b.depth - a.depth);
   for (const f of faces) polygon(ctx, f.p, f.color);
-  label(roadX(course.stop) - 4.95, 2.82, course.stop - 0.06, "止まれ", 0.24);
-  label(roadX(course.finish), 3.78, course.finish - 0.11, "ROADLAB", 0.36);
+  if (route === "town") {
+    label(roadX(course.stop) - 4.95, 2.82, course.stop - 0.06, "止まれ", 0.24);
+    label(roadX(course.finish), 3.78, course.finish - 0.11, "ROADLAB", 0.36);
+  }
+  if (route !== "town") {
+    if (car.z < 20)
+      label(
+        -6.85,
+        3.2,
+        19.9,
+        route === "market"
+          ? "← 商店街"
+          : route === "station"
+            ? "駅前 →"
+            : "市役所 →",
+        0.49,
+      );
+    if (route === "avenue" && car.x < junction.secondaryLine && car.x > 2)
+      label(
+        junction.secondaryLine - 0.08,
+        2.88,
+        junction.z + 6.65,
+        "止まれ",
+        0.34,
+      );
+  }
   // The inside of the car remains fixed to the camera, independently of the street meshes.
   polygon(
     ctx,

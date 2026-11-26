@@ -45,3 +45,7 @@ The app ships all content and artwork locally. Each published item links to its 
 Choose **3D Driving School** on the dashboard or open `#/drive`. Drive a right-hand-drive car through a 150 m Japanese town course. Follow the left lane, stop before the marked line, let the pedestrian cross and reach the green finish gate. Hold the arrow keys or WASD to steer, accelerate and brake. The on-screen controls support simultaneous steering and pedal input. Pause with Escape or the Pause button. Losing window focus pauses the simulation.
 
 The town uses original polygon meshes, a moving perspective camera and a Canvas 2D rasterizer. Shadows, traffic and handling are simplified for this introductory course. A completed or failed drive can be replayed and does not affect quiz scores.
+
+### Urban intersections
+
+Use the driving route selector to choose **Market street** (left turn across a pedestrian crossing), **Station road** (right turn across opposing through traffic), or **Civic avenue** (both conflicts in one right turn). Approach, steer through the actual junction and stay on the left of the exit street until the green destination gate. Hold Q or E, or the look buttons, to check the sides. The signal strip identifies the approach, opposing and pedestrian aspects. Traffic and pedestrians move on the simulation clock while the player waits. Pausing freezes the entire scene. Civic avenue continues to a second intersection with a stop sign after the turn. Changing routes while paused starts a fresh attempt.

@@ -26,3 +26,9 @@ The wildlife warning is a nationwide sign. The winter collection draws on Hokkai
 ## Gaps
 
 Complex supplementary combinations, most guide signs, road markings, flashing signals, vehicle-specific exemptions and detailed winter rental equipment rules await verification. No catalogue-wide coverage percentage is claimed. New legal edge cases need current ordinance or statute references and independent language review.
+
+## Urban driving scenarios
+
+The 3D market, station and civic routes simulate ordinary passenger cars at signalised intersections with permissive turns. The approach and opposing through traffic receive plain circular green together. Pedestrians can receive walk on the parallel crossing across the turn exit. Each road user follows the signal facing them. A right-turning car yields to opposing through traffic. At a crosswalk the driver stops and gives priority to pedestrians crossing or about to cross. The scenarios use simulated approach gaps and crossing occupancy for training feedback. These values are game parameters.
+
+Checked 2026-11-26 against the signal table in Article 2 of the Enforcement Order and the NPA's guidance on intersections (page 2, section 6). The driving routes do not change the scored question inventory. [道路交通法施行令](https://laws.e-gov.go.jp/law/335CO0000000270) · [National Police Agency driving guide](https://www.npa.go.jp/english/bureau/traffic/document/r8_followtherules_en02.pdf)

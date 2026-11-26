@@ -8,9 +8,24 @@ import { course, drive, neutral, spawn, type Controls } from "./simulation";
 import { render } from "./render";
 import { makeWorld } from "./world";
 import { copy } from "./strings";
+import {
+  districts,
+  urbanSpawn,
+  urbanDrive,
+  urbanProgress,
+  phaseAt,
+  junction,
+  type RouteId,
+} from "./urban";
+import { urbanWorld } from "./urbanWorld";
+import { urbanCopy } from "./urbanCopy";
 import "./drive.css";
+const strings = { ...copy, ...urbanCopy };
+type Input = keyof Controls | "lookLeft" | "lookRight";
 type Phase = "ready" | "active" | "paused" | "ended";
-const keyMap: Record<string, keyof Controls> = {
+const keyMap: Record<string, Input> = {
+  KeyQ: "lookLeft",
+  KeyE: "lookRight",
   ArrowLeft: "left",
   KeyA: "left",
   ArrowRight: "right",
@@ -21,13 +36,28 @@ const keyMap: Record<string, keyof Controls> = {
   KeyS: "brake",
 };
 export default function Drive({ l }: { l: Locale }) {
+  const [route, setRoute] = useState<RouteId>("town");
+  return <Course key={route} route={route} setRoute={setRoute} l={l} />;
+}
+function Course({
+  l,
+  route,
+  setRoute,
+}: {
+  l: Locale;
+  route: RouteId;
+  setRoute: (id: RouteId) => void;
+}) {
+  const urban = route !== "town",
+    district = urban ? districts[route] : null;
+  const newCar = urban ? urbanSpawn : spawn;
   const canvas = useRef<HTMLCanvasElement>(null),
-    car = useRef(spawn()),
-    held = useRef(new Map<string, keyof Controls>());
+    car = useRef(newCar()),
+    held = useRef(new Map<string, Input>());
   const [phase, setPhase] = useState<Phase>("ready"),
     [snapshot, setSnapshot] = useState(() => ({ ...car.current })),
     [available, setAvailable] = useState(true);
-  const text = (k: keyof typeof copy) => copy[k][l];
+  const text = (k: keyof typeof strings) => strings[k][l];
   useEffect(() => {
     const el = canvas.current,
       ctx = el?.getContext("2d", { alpha: false });
@@ -35,7 +65,8 @@ export default function Drive({ l }: { l: Locale }) {
       setAvailable(false);
       return;
     }
-    const world = makeWorld();
+    const world = route === "town" ? makeWorld() : urbanWorld(route);
+    let look = 0;
     let frame = 0,
       last = 0,
       reported = 0;
@@ -80,14 +111,23 @@ export default function Drive({ l }: { l: Locale }) {
       ctx.setTransform(el.width / w, 0, 0, el.height / h, 0, 0);
       if (phase === "active") {
         const keys = neutral();
-        for (const name of held.current.values()) keys[name] = true;
-        drive(car.current, keys, last ? (time - last) / 1000 : 0);
+        const inputs = new Set(held.current.values());
+        for (const k of Object.keys(keys) as (keyof Controls)[])
+          keys[k] = inputs.has(k);
+        const dt = last ? (time - last) / 1000 : 0;
+        look +=
+          (Number(inputs.has("lookRight")) -
+            Number(inputs.has("lookLeft")) -
+            look) *
+          Math.min(1, dt * 10);
+        if (route === "town") drive(car.current, keys, dt);
+        else urbanDrive(car.current, keys, dt, route);
         if (time - reported > 90 || car.current.result) {
           setSnapshot({ ...car.current });
           reported = time;
         }
       }
-      render(ctx, w, h, car.current, world);
+      render(ctx, w, h, car.current, world, route, urban ? look : 0);
       last = time;
       if (phase === "active") {
         if (car.current.result) setPhase("ended");
@@ -112,7 +152,7 @@ export default function Drive({ l }: { l: Locale }) {
       window.removeEventListener("blur", pause);
       document.removeEventListener("visibilitychange", visibility);
     };
-  }, [phase]);
+  }, [phase, route, urban]);
   const stage = !snapshot.stopped
     ? "first"
     : !snapshot.crossed
@@ -132,6 +172,23 @@ export default function Drive({ l }: { l: Locale }) {
         2,
     ),
   );
+  const name = district ? district.name[l] : text("route");
+  const routeLength = urban ? junction.z + junction.finish : course.finish;
+  const progress =
+    route === "town" ? snapshot.z + 2 : urbanProgress(snapshot, route);
+  const hint =
+    route === "avenue" && snapshot.x > junction.cross + 2 && !snapshot.stopped
+      ? "sideStop"
+      : district
+        ? district.turn * snapshot.x > junction.cross + 2
+          ? "exit"
+          : district.turn === 1
+            ? "turnRight"
+            : "turnLeft"
+        : stage;
+  const signals = phaseAt(snapshot.elapsed);
+  const lamp = (s: typeof signals.vehicle | typeof signals.walk) =>
+    text(s === "red" ? "redLight" : s === "amber" ? "yellow" : s);
   const rule = rules.find(
     (r) =>
       r.id ===
@@ -143,7 +200,7 @@ export default function Drive({ l }: { l: Locale }) {
   );
   function start() {
     if (phase !== "paused") {
-      car.current = spawn();
+      car.current = newCar();
       setSnapshot({ ...car.current });
     }
     setPhase("active");
@@ -154,7 +211,7 @@ export default function Drive({ l }: { l: Locale }) {
         <div>
           <small className="kicker">
             <Icon name="road" />
-            {text("route")} · 150 m
+            {name} · {routeLength} m
           </small>
           <h1>{text("title")}</h1>
         </div>
@@ -167,14 +224,40 @@ export default function Drive({ l }: { l: Locale }) {
           </button>
         )}
       </div>
+      <label className="route-select">
+        {text("choose")}
+        <select
+          disabled={phase === "active"}
+          value={route}
+          onChange={(e) => setRoute(e.target.value as RouteId)}
+        >
+          <option value="town">{text("route")}</option>
+          {Object.entries(districts).map(([id, d]) => (
+            <option key={id} value={id}>
+              {d.name[l]}
+            </option>
+          ))}
+        </select>
+      </label>
       <div className="windshield">
-        <canvas ref={canvas} role="img" aria-label={text("view")} />
+        <canvas
+          ref={canvas}
+          role="img"
+          aria-label={text(urban ? "urbanView" : "view")}
+        />
         <div className="drive-hud">
           <div>
             <i />
-            <span aria-live="polite">{text(stage)}</span>
+            <span aria-live="polite">{text(hint)}</span>
           </div>
-          {stage !== "wait" && <strong>{distance} m</strong>}
+          {stage !== "wait" && (
+            <strong>
+              {urban
+                ? Math.max(0, Math.round(routeLength - progress))
+                : distance}{" "}
+              m
+            </strong>
+          )}
         </div>
         {phase === "paused" && (
           <div className="drive-shade">
@@ -184,16 +267,43 @@ export default function Drive({ l }: { l: Locale }) {
           </div>
         )}
       </div>
+      {urban && (
+        <div className="signal-strip">
+          {(
+            [
+              ["lights", signals.vehicle],
+              ["opposition", signals.vehicle],
+              ["walkLight", signals.walk],
+            ] as const
+          ).map(([key, lampState]) => (
+            <div key={key}>
+              <i className={"lens " + lampState} />
+              <span>
+                {text(key)}
+                <b>{lamp(lampState)}</b>
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
       <progress
-        aria-label={text("route")}
-        value={Math.min(course.finish, Math.max(0, snapshot.z + 2))}
-        max={course.finish}
+        aria-label={name}
+        value={Math.min(routeLength, Math.max(0, progress))}
+        max={routeLength}
       />
       {!available ? (
         <p role="alert">{text("unavailable")}</p>
       ) : phase === "ready" || phase === "ended" ? (
         <div className="drive-brief">
           <div>
+            {urban && (
+              <p className="urban-sources">
+                <a href="https://laws.e-gov.go.jp/law/335CO0000000270">
+                  {text("signalSource")} ↗
+                </a>{" "}
+                · <a href={sources.npa.url}>{text("yieldSource")} ↗</a>
+              </p>
+            )}
             {phase === "ended" && (
               <h2>
                 {text(snapshot.result === "complete" ? "complete" : "ended")}
@@ -201,10 +311,14 @@ export default function Drive({ l }: { l: Locale }) {
             )}
             <p>
               {phase === "ready"
-                ? text("brief")
+                ? district
+                  ? district.brief[l]
+                  : text("brief")
                 : text(
                     snapshot.result === "complete"
-                      ? "success"
+                      ? urban
+                        ? "urbanSuccess"
+                        : "success"
                       : (snapshot.result ?? "ended"),
                   )}
             </p>
@@ -221,46 +335,67 @@ export default function Drive({ l }: { l: Locale }) {
           </button>
         </div>
       ) : (
-        <div className="drive-controls">
-          {(["left", "right", "brake", "gas"] as const).map((k) => (
-            <button
-              key={k}
-              type="button"
-              disabled={phase !== "active"}
-              className={"pedal " + k}
-              aria-label={text(k)}
-              onContextMenu={(e) => e.preventDefault()}
-              onPointerDown={(e) => {
-                if (e.button !== 0) return;
-                e.currentTarget.setPointerCapture(e.pointerId);
-                held.current.set("p" + e.pointerId, k);
-              }}
-              onLostPointerCapture={(e) =>
-                held.current.delete("p" + e.pointerId)
-              }
-              onPointerUp={(e) => held.current.delete("p" + e.pointerId)}
-              onPointerCancel={(e) => held.current.delete("p" + e.pointerId)}
-              onKeyDown={(e) => {
-                if (["Enter", "Space"].includes(e.code)) {
-                  e.preventDefault();
-                  held.current.set("button" + e.code, k);
+        <>
+          <div className="drive-controls">
+            {(
+              [
+                "left",
+                "right",
+                "brake",
+                "gas",
+                ...(urban ? (["lookLeft", "lookRight"] as const) : []),
+              ] as const
+            ).map((k) => (
+              <button
+                key={k}
+                type="button"
+                disabled={phase !== "active"}
+                className={"pedal " + k}
+                aria-label={text(k)}
+                onContextMenu={(e) => e.preventDefault()}
+                onPointerDown={(e) => {
+                  if (e.button !== 0) return;
+                  e.currentTarget.setPointerCapture(e.pointerId);
+                  held.current.set("p" + e.pointerId, k);
+                }}
+                onLostPointerCapture={(e) =>
+                  held.current.delete("p" + e.pointerId)
                 }
-              }}
-              onKeyUp={(e) => held.current.delete("button" + e.code)}
-              onBlur={() => {
-                held.current.delete("buttonSpace");
-                held.current.delete("buttonEnter");
-              }}
-            >
-              <b aria-hidden="true">
-                {{ left: "←", right: "→", brake: "▥", gas: "↑" }[k]}
-              </b>
-              <span>{text(k)}</span>
-            </button>
-          ))}
-        </div>
+                onPointerUp={(e) => held.current.delete("p" + e.pointerId)}
+                onPointerCancel={(e) => held.current.delete("p" + e.pointerId)}
+                onKeyDown={(e) => {
+                  if (["Enter", "Space"].includes(e.code)) {
+                    e.preventDefault();
+                    held.current.set("button" + e.code, k);
+                  }
+                }}
+                onKeyUp={(e) => held.current.delete("button" + e.code)}
+                onBlur={() => {
+                  held.current.delete("buttonSpace");
+                  held.current.delete("buttonEnter");
+                }}
+              >
+                <b aria-hidden="true">
+                  {
+                    {
+                      left: "←",
+                      right: "→",
+                      brake: "▥",
+                      gas: "↑",
+                      lookLeft: "↶",
+                      lookRight: "↷",
+                    }[k]
+                  }
+                </b>
+                <span>{text(k)}</span>
+              </button>
+            ))}
+          </div>
+        </>
       )}
-      <p className="drive-help">{text("controls")}</p>
+      <p className="drive-help">
+        {text("controls")} {urban && text("lookHelp")}
+      </p>
     </section>
   );
 }

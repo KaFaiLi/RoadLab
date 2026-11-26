@@ -15,8 +15,21 @@ export const neutral = (): Controls => ({
   left: false,
   right: false,
 });
-export type Result = "stop" | "yield" | "lane" | "curb" | "complete";
+export type Result =
+  | "red"
+  | "amber"
+  | "opposing"
+  | "walk"
+  | "wrongTurn"
+  | "stop"
+  | "yield"
+  | "lane"
+  | "curb"
+  | "complete";
 export type Car = {
+  elapsed: number;
+  entered: boolean;
+  amberPass: boolean;
   x: number;
   z: number;
   yaw: number;
@@ -30,6 +43,9 @@ export type Car = {
 };
 export function spawn(): Car {
   return {
+    elapsed: 0,
+    entered: false,
+    amberPass: false,
     x: laneX(0),
     z: 0,
     yaw: 0,
@@ -47,15 +63,7 @@ export const pedestrianX = (car: Car) =>
 export function drive(car: Car, keys: Controls, dt: number) {
   if (car.result) return;
   dt = Math.min(0.05, Math.max(0, dt));
-  const target = Number(keys.right) - Number(keys.left);
-  car.steer += (target - car.steer) * Math.min(1, dt * 6);
-  car.speed = Math.max(
-    0,
-    Math.min(11.1, car.speed + dt * (keys.brake ? -7 : keys.gas ? 2.8 : -0.9)),
-  );
-  car.yaw += ((car.speed * Math.tan(car.steer * 0.36)) / 2.65) * dt;
-  car.x += Math.sin(car.yaw) * car.speed * dt;
-  car.z += Math.cos(car.yaw) * car.speed * dt;
+  advanceVehicle(car, keys, dt);
   const offset = car.x - roadX(car.z);
   car.offLane = offset > -0.4 ? car.offLane + dt : 0;
   const nose = car.z + 2;
@@ -91,4 +99,21 @@ export function drive(car: Car, keys: Controls, dt: number) {
     return;
   }
   if (nose >= course.finish) car.result = "complete";
+}
+
+export function advanceVehicle(
+  car: Car,
+  keys: Controls,
+  dt: number,
+  steeringAngle = 0.36,
+) {
+  const target = Number(keys.right) - Number(keys.left);
+  car.steer += (target - car.steer) * Math.min(1, dt * 6);
+  car.speed = Math.max(
+    0,
+    Math.min(11.1, car.speed + dt * (keys.brake ? -7 : keys.gas ? 2.8 : -0.9)),
+  );
+  car.yaw += ((car.speed * Math.tan(car.steer * steeringAngle)) / 2.65) * dt;
+  car.x += Math.sin(car.yaw) * car.speed * dt;
+  car.z += Math.cos(car.yaw) * car.speed * dt;
 }
