@@ -1,3 +1,4 @@
+import { skillText, lessonText, type Skill } from "../content/drivingLessons";
 import { useState } from "react";
 import { Breakdown, Stats, type T } from "../components/Shared";
 import { questions } from "../content";
@@ -40,6 +41,22 @@ export function Progress({
       ) : (
         <p>{t("empty")}</p>
       )}
+      <h2>{lessonText.skills[l]}</h2>
+      <p>
+        {lessonText.runs[l]} ·{" "}
+        {(data.drives ?? []).filter((d) => d.completed).length} /{" "}
+        {(data.drives ?? []).length}
+      </p>
+      <ul>
+        {(Object.keys(skillText) as Skill[]).map((k) => {
+          const count = data.drives?.filter((d) => d.skills.includes(k)).length;
+          return count ? (
+            <li key={k}>
+              {skillText[k][l]} · {count}
+            </li>
+          ) : null;
+        })}
+      </ul>
       <h2>{t("settings")}</h2>
       <p>{t("saved")}</p>
       <div className="actions">

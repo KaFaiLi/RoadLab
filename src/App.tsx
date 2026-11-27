@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { Icon, type IconName } from "./components/Icon";
 import { type Mode, type T } from "./components/Shared";
 import { locales, type Locale } from "./content/schema";
@@ -7,7 +7,7 @@ import { Catalogue } from "./features/Catalogue";
 import { Game } from "./features/Game";
 import { Home } from "./features/Home";
 import { Progress } from "./features/Progress";
-import { read, save } from "./lib/game";
+import { read, save, type DriveRecord } from "./lib/game";
 const Drive = lazy(() => import("./features/drive/Drive"));
 const route = () => location.hash.replace(/^#\/?/, "") || "home";
 export default function App() {
@@ -15,6 +15,11 @@ export default function App() {
     [data, setData] = useState(initial.data),
     [error, setError] = useState(initial.error),
     [page, setPage] = useState(route);
+  const recordDrive = useCallback(
+    (run: DriveRecord) =>
+      setData((d) => ({ ...d, drives: [...(d.drives ?? []), run] })),
+    [],
+  );
   useEffect(() => {
     function change() {
       setPage(route());
@@ -75,7 +80,7 @@ export default function App() {
         {error && <p role="alert">{t("storage")}</p>}
         {page === "drive" ? (
           <Suspense fallback={<p>{t("driveTitle")}…</p>}>
-            <Drive l={l} />
+            <Drive l={l} recordDrive={recordDrive} />
           </Suspense>
         ) : page === "catalogue" ? (
           <Catalogue {...props} />

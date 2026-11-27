@@ -20,7 +20,15 @@ import {
 import { urbanWorld } from "./urbanWorld";
 import { urbanCopy } from "./urbanCopy";
 import "./drive.css";
-const strings = { ...copy, ...urbanCopy };
+import {
+  eventText,
+  skillText,
+  lessonText,
+  type Skill,
+} from "../../content/drivingLessons";
+import type { DriveRecord } from "../../lib/game";
+import { arrowOn, note } from "./encounters";
+const strings = { ...copy, ...urbanCopy, ...lessonText };
 type Input = keyof Controls | "lookLeft" | "lookRight";
 type Phase = "ready" | "active" | "paused" | "ended";
 const keyMap: Record<string, Input> = {
@@ -35,22 +43,39 @@ const keyMap: Record<string, Input> = {
   ArrowDown: "brake",
   KeyS: "brake",
 };
-export default function Drive({ l }: { l: Locale }) {
+export default function Drive({
+  l,
+  recordDrive,
+}: {
+  l: Locale;
+  recordDrive: (r: DriveRecord) => void;
+}) {
   const [route, setRoute] = useState<RouteId>("town");
-  return <Course key={route} route={route} setRoute={setRoute} l={l} />;
+  return (
+    <Course
+      key={route}
+      route={route}
+      setRoute={setRoute}
+      l={l}
+      recordDrive={recordDrive}
+    />
+  );
 }
 function Course({
   l,
   route,
   setRoute,
+  recordDrive,
 }: {
   l: Locale;
   route: RouteId;
+  recordDrive: (r: DriveRecord) => void;
   setRoute: (id: RouteId) => void;
 }) {
   const urban = route !== "town",
     district = urban ? districts[route] : null;
-  const newCar = urban ? urbanSpawn : spawn;
+  const newCar = (variant = 0) =>
+    route === "town" ? spawn() : urbanSpawn(route, variant);
   const canvas = useRef<HTMLCanvasElement>(null),
     car = useRef(newCar()),
     held = useRef(new Map<string, Input>());
@@ -120,18 +145,46 @@ function Course({
             Number(inputs.has("lookLeft")) -
             look) *
           Math.min(1, dt * 10);
-        if (route === "town") drive(car.current, keys, dt);
-        else urbanDrive(car.current, keys, dt, route);
+        if (
+          district &&
+          car.current.z > 22 &&
+          district.turn * car.current.x < 9 &&
+          district.turn * look > 0.6
+        )
+          note(car.current, "looked");
+        if (route === "town") {
+          drive(car.current, keys, dt);
+          if (car.current.stopped) note(car.current, "sideStop");
+          if (car.current.crossed) note(car.current, "walkWait");
+        } else urbanDrive(car.current, keys, dt, route);
         if (time - reported > 90 || car.current.result) {
           setSnapshot({ ...car.current });
           reported = time;
         }
       }
-      render(ctx, w, h, car.current, world, route, urban ? look : 0);
+      render(
+        ctx,
+        w,
+        h,
+        car.current,
+        world,
+        route,
+        urban ? (route === "cycle" && look < 0 ? look * 2.2 : look) : 0,
+      );
       last = time;
       if (phase === "active") {
-        if (car.current.result) setPhase("ended");
-        else frame = requestAnimationFrame(paint);
+        if (car.current.result) {
+          recordDrive({
+            route,
+            variant: car.current.variant,
+            at: Date.now(),
+            completed: car.current.result === "complete",
+            skills: car.current.events
+              .filter((e) => Object.hasOwn(skillText, e.key))
+              .map((e) => e.key as Skill),
+          });
+          setPhase("ended");
+        } else frame = requestAnimationFrame(paint);
       }
     }
     const resize = new ResizeObserver(() => {
@@ -152,7 +205,7 @@ function Course({
       window.removeEventListener("blur", pause);
       document.removeEventListener("visibilitychange", visibility);
     };
-  }, [phase, route, urban]);
+  }, [phase, route, urban, district, recordDrive]);
   const stage = !snapshot.stopped
     ? "first"
     : !snapshot.crossed
@@ -177,16 +230,32 @@ function Course({
   const progress =
     route === "town" ? snapshot.z + 2 : urbanProgress(snapshot, route);
   const hint =
-    route === "avenue" && snapshot.x > junction.cross + 2 && !snapshot.stopped
-      ? "sideStop"
-      : district
-        ? district.turn * snapshot.x > junction.cross + 2
-          ? "exit"
-          : district.turn === 1
-            ? "turnRight"
-            : "turnLeft"
-        : stage;
+    route === "lanes" && snapshot.z < 24
+      ? "selectLane"
+      : route === "cycle" && snapshot.x > -9
+        ? "riverTurn"
+        : route === "avenue" &&
+            snapshot.x > junction.cross + 2 &&
+            !snapshot.stopped
+          ? "sideStop"
+          : district
+            ? district.turn * snapshot.x > junction.cross + 2
+              ? "exit"
+              : district.turn === 1
+                ? "turnRight"
+                : "turnLeft"
+            : stage;
   const signals = phaseAt(snapshot.elapsed);
+  const showSignals =
+    urban && (district?.turn ?? 1) * snapshot.x < junction.cross + 2;
+  const checkSide =
+    (route === "avenue" || route === "market" || route === "cycle") &&
+    phase === "active" &&
+    district &&
+    snapshot.z > 24 &&
+    district.turn * snapshot.x < 8 &&
+    !snapshot.events.some((e) => e.key === "looked");
+
   const lamp = (s: typeof signals.vehicle | typeof signals.walk) =>
     text(s === "red" ? "redLight" : s === "amber" ? "yellow" : s);
   const rule = rules.find(
@@ -198,9 +267,9 @@ function Course({
           ? "left"
           : "stop"),
   );
-  function start() {
+  function start(variant = snapshot.variant) {
     if (phase !== "paused") {
-      car.current = newCar();
+      car.current = newCar(variant);
       setSnapshot({ ...car.current });
     }
     setPhase("active");
@@ -239,16 +308,49 @@ function Course({
           ))}
         </select>
       </label>
+      {route === "avenue" && (
+        <label className="route-select">
+          {text("variant")}
+          <select
+            value={snapshot.variant}
+            disabled={phase === "active" || phase === "paused"}
+            onChange={(e) => {
+              car.current = newCar(Number(e.target.value));
+              setSnapshot({ ...car.current });
+              setPhase("ready");
+            }}
+          >
+            {[0, 1, 2].map((n) => (
+              <option key={n} value={n}>
+                {n + 1} / 3
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       <div className="windshield">
         <canvas
           ref={canvas}
           role="img"
           aria-label={text(urban ? "urbanView" : "view")}
         />
+        {route === "cycle" && (
+          <small className="mirror-label">{text("mirror")}</small>
+        )}
         <div className="drive-hud">
           <div>
             <i />
-            <span aria-live="polite">{text(hint)}</span>
+            <span aria-live="polite">
+              {checkSide
+                ? text(
+                    route === "cycle"
+                      ? "bikeCheck"
+                      : district.turn === 1
+                        ? "inspectRight"
+                        : "inspectLeft",
+                  )
+                : text(hint)}
+            </span>
           </div>
           {stage !== "wait" && (
             <strong>
@@ -261,19 +363,19 @@ function Course({
         </div>
         {phase === "paused" && (
           <div className="drive-shade">
-            <button className="button warm" onClick={start}>
+            <button className="button warm" onClick={() => start()}>
               {text("resume")} ▸
             </button>
           </div>
         )}
       </div>
-      {urban && (
+      {showSignals && (
         <div className="signal-strip">
           {(
             [
-              ["lights", signals.vehicle],
-              ["opposition", signals.vehicle],
-              ["walkLight", signals.walk],
+              ["lights", route === "lanes" ? "red" : signals.vehicle],
+              ["opposition", route === "lanes" ? "red" : signals.vehicle],
+              ["walkLight", route === "lanes" ? "red" : signals.walk],
             ] as const
           ).map(([key, lampState]) => (
             <div key={key}>
@@ -284,6 +386,11 @@ function Course({
               </span>
             </div>
           ))}
+          {route === "lanes" && arrowOn(snapshot.elapsed) && (
+            <div>
+              <b>→ {text("arrowGreen")}</b>
+            </div>
+          )}
         </div>
       )}
       <progress
@@ -301,6 +408,16 @@ function Course({
                 <a href="https://laws.e-gov.go.jp/law/335CO0000000270">
                   {text("signalSource")} ↗
                 </a>{" "}
+                ·{" "}
+                <a href="https://laws.e-gov.go.jp/law/335AC0000000105">
+                  {text("law")} ↗
+                </a>
+                {route === "snow" && (
+                  <>
+                    {" "}
+                    · <a href={sources.winter.url}>{text("winterSource")} ↗</a>
+                  </>
+                )}
                 · <a href={sources.npa.url}>{text("yieldSource")} ↗</a>
               </p>
             )}
@@ -330,9 +447,40 @@ function Course({
                 </a>
               )}
           </div>
-          <button className="button" onClick={start}>
-            {text(phase === "ready" ? "start" : "retry")} <Icon name="arrow" />
+          {phase === "ended" && (
+            <div className="drive-review">
+              <h3>{text("timeline")}</h3>
+              <ol>
+                {snapshot.events.map((e) => (
+                  <li key={e.key}>
+                    <time>{e.time.toFixed(1)} s</time> {eventText[e.key][l]}
+                  </li>
+                ))}
+                <li>
+                  <time>{snapshot.elapsed.toFixed(1)} s</time>{" "}
+                  {text(snapshot.result ?? "ended")}
+                </li>
+              </ol>
+            </div>
+          )}
+          <button className="button" onClick={() => start()}>
+            {text(
+              phase === "ready"
+                ? "start"
+                : route === "avenue"
+                  ? "retrySame"
+                  : "retry",
+            )}{" "}
+            <Icon name="arrow" />
           </button>
+          {route === "avenue" && phase === "ended" && (
+            <button
+              className="drive-secondary"
+              onClick={() => start((snapshot.variant + 1) % 3)}
+            >
+              {text("different")}
+            </button>
+          )}
         </div>
       ) : (
         <>
@@ -393,6 +541,7 @@ function Course({
           </div>
         </>
       )}
+      {route === "snow" && <small>{text("coaching")}</small>}
       <p className="drive-help">
         {text("controls")} {urban && text("lookHelp")}
       </p>
