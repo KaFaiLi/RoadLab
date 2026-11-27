@@ -1,3 +1,4 @@
+import { skillText, type Skill } from "../content/drivingLessons";
 import { z } from "zod";
 import { locales, type Locale, type Question } from "../content/schema";
 export function shuffle<T>(items: readonly T[], random = Math.random) {
@@ -20,8 +21,27 @@ export const attemptSchema = z.object({
   at: z.number(),
 });
 export type Attempt = z.infer<typeof attemptSchema>;
+const driveRecordSchema = z.object({
+  route: z.enum([
+    "town",
+    "market",
+    "station",
+    "avenue",
+    "queue",
+    "delivery",
+    "cycle",
+    "lanes",
+    "snow",
+  ]),
+  variant: z.number().int().min(0).max(2),
+  completed: z.boolean(),
+  at: z.number(),
+  skills: z.array(z.enum(Object.keys(skillText) as [Skill, ...Skill[]])),
+});
+export type DriveRecord = z.infer<typeof driveRecordSchema>;
 export const historySchema = z.object({
   version: z.literal(1),
+  drives: z.array(driveRecordSchema).optional(),
   locale: z.enum(locales),
   attempts: z.array(attemptSchema),
   last: z

@@ -287,3 +287,34 @@
     flex: 1;
   }
 }
+.drive-brief:has(.drive-review) {
+  flex-wrap: wrap;
+}
+.drive-review {
+  width: 100%;
+  border-top: 1px solid #d6dece;
+  padding-top: 10px;
+}
+.drive-review ol {
+  list-style: none;
+  padding: 0;
+}
+.drive-review li {
+  padding: 4px 0;
+}
+.drive-review time {
+  display: inline-block;
+  min-width: 4.5em;
+  font: 600 13px monospace;
+  color: #41634d;
+}
+.mirror-label {
+  position: absolute;
+  left: 3.6%;
+  top: 50%;
+  font: 600 10px system-ui;
+  color: #fff;
+  background: #263536d9;
+  padding: 1px 5px;
+  pointer-events: none;
+}

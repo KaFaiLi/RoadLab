@@ -18,6 +18,7 @@ export function render(
   world: Face[],
   route: RouteId = "town",
   look = 0,
+  mirror = false,
 ) {
   const sky = ctx.createLinearGradient(0, 0, 0, h * 0.62);
   sky.addColorStop(0, "#78b4c7");
@@ -83,8 +84,7 @@ export function render(
       ...box(px + 0.12 + walk, 0, pz, 0.15, 0.84, 0.19, "#455764"),
     ];
   }
-  const actors =
-    route === "town" ? townPedestrian() : urbanActors(route, car.elapsed);
+  const actors = route === "town" ? townPedestrian() : urbanActors(route, car);
   const faces: { p: Point[]; depth: number; color: string; layer: number }[] =
     [];
   for (const item of [...world, ...actors]) {
@@ -124,7 +124,16 @@ export function render(
     });
   }
   faces.sort((a, b) => a.layer - b.layer || b.depth - a.depth);
-  for (const f of faces) polygon(ctx, f.p, f.color);
+  for (const f of faces) {
+    polygon(ctx, f.p, f.color);
+    if (route === "snow") {
+      ctx.globalAlpha = Math.min(0.94, Math.max(0, (f.depth - 7) / 44));
+      polygon(ctx, f.p, "#e0e8eb");
+      ctx.globalAlpha = 1;
+    }
+  }
+  if (mirror) return;
+  if (route === "lanes" && car.z < 17) label(-3, 4.64, 16.85, "↑　　　 →", 0.5);
   if (route === "town") {
     label(roadX(course.stop) - 4.95, 2.82, course.stop - 0.06, "止まれ", 0.24);
     label(roadX(course.finish), 3.78, course.finish - 0.11, "ROADLAB", 0.36);
@@ -135,11 +144,15 @@ export function render(
         -6.85,
         3.2,
         19.9,
-        route === "market"
-          ? "← 商店街"
-          : route === "station"
-            ? "駅前 →"
-            : "市役所 →",
+        route === "cycle"
+          ? "← 川沿い"
+          : route === "snow"
+            ? "市街地 →"
+            : ["market", "delivery"].includes(route)
+              ? "← 商店街"
+              : ["station", "queue", "lanes"].includes(route)
+                ? "駅前 →"
+                : "市役所 →",
         0.49,
       );
     if (route === "avenue" && car.x < junction.secondaryLine && car.x > 2)
@@ -250,4 +263,34 @@ export function render(
   ctx.ellipse(0, 0, radius * 0.32, radius * 0.24, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
+  if (route === "cycle") {
+    // Reflected camera points behind the left side of the car; it renders the same actors and clock.
+    const mw = w * 0.24,
+      mh = h * 0.2,
+      mx = w * 0.035,
+      my = h * 0.5;
+    ctx.save();
+    ctx.fillStyle = "#233739";
+    ctx.fillRect(mx - 3, my - 3, mw + 6, mh + 6);
+    ctx.beginPath();
+    ctx.rect(mx, my, mw, mh);
+    ctx.clip();
+    ctx.translate(mx + mw, my);
+    ctx.scale(-1, 1);
+    render(
+      ctx,
+      mw,
+      mh,
+      {
+        ...car,
+        x: car.x - 1.1 * Math.cos(car.yaw),
+        z: car.z + 1.1 * Math.sin(car.yaw),
+      },
+      world,
+      route,
+      Math.PI + 0.16,
+      true,
+    );
+    ctx.restore();
+  }
 }

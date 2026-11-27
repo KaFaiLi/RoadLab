@@ -32,3 +32,17 @@ Complex supplementary combinations, most guide signs, road markings, flashing si
 The 3D market, station and civic routes simulate ordinary passenger cars at signalised intersections with permissive turns. The approach and opposing through traffic receive plain circular green together. Pedestrians can receive walk on the parallel crossing across the turn exit. Each road user follows the signal facing them. A right-turning car yields to opposing through traffic. At a crosswalk the driver stops and gives priority to pedestrians crossing or about to cross. The scenarios use simulated approach gaps and crossing occupancy for training feedback. These values are game parameters.
 
 Checked 2026-11-26 against the signal table in Article 2 of the Enforcement Order and the NPA's guidance on intersections (page 2, section 6). The driving routes do not change the scored question inventory. [道路交通法施行令](https://laws.e-gov.go.jp/law/335CO0000000270) · [National Police Agency driving guide](https://www.npa.go.jp/english/bureau/traffic/document/r8_followtherules_en02.pdf)
+
+## Driving decision lessons
+
+Checked 2026-11-27 for ordinary passenger cars. Civic Avenue has three reproducible schedules covering cars clearing first, pedestrians clearing first, and a walk signal with an empty crossing. Five additional cockpit lessons use the following evidence.
+
+| Lesson                           | Authority and application                                                                                                                                                                                                   |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Station exit queue               | Road Traffic Act, Article 50(1–2), on entering when downstream congestion would obstruct the intersection or cause a vehicle to stop on a crossing. The simulated queue leaves insufficient space beyond the zebra stripes. |
+| Delivery van and shopper         | Road Traffic Act, Article 38(1), on approach speed where the crossing may be occupied, stopping and yielding. The van obscures an unsignalised crossing before the signalised junction.                                     |
+| Left turn beside a cyclist       | Articles 34(1) and 70 cover left turns and safe operation. The reflected left-side camera and shoulder check are observation aids. The game evaluates the overlap with the rider.                                           |
+| Marked right-turn lane and arrow | Article 35(1) covers designated lanes. The Enforcement Order, Article 2 signal table, permits the direction shown by an illuminated green arrow. The model has a red circular lamp and a separate right arrow.              |
+| Hokkaido winter approach         | Article 26 covers following distance. The regional winter guide describes extended stopping distances on packed snow and ice. Grip, visibility and operating margins in the simulation are coaching parameters.             |
+
+[Road Traffic Act](https://laws.e-gov.go.jp/law/335AC0000000105) · [Enforcement Order](https://laws.e-gov.go.jp/law/335CO0000000270) · [Hokkaido winter driving guide, p. 1](https://hokkaido-safe-travel.mlit.go.jp/images/pdf/winter_drive_eng.pdf)

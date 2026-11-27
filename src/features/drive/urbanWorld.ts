@@ -1,3 +1,5 @@
+import type { Car } from "./simulation";
+import { queueTail, lessonActors, arrowOn } from "./encounters";
 import { box, face, type Face, type V } from "./world";
 import { districts, junction, phaseAt, trafficAt, type UrbanId } from "./urban";
 function surface(
@@ -34,6 +36,47 @@ export function urbanWorld(id: UrbanId) {
   ground(0, J, 196, 184, "#b8b6a6");
   ground(0, J, 12, 184, "#49545a", 0.2);
   ground(0, J, 196, 12, "#49545a", 0.2);
+  if (id === "snow") {
+    ground(0, J, 196, 184, "#e0e9ea", 0.1);
+    ground(0, J, 12, 184, "#9caeb2", 0.24);
+    ground(0, J, 196, 12, "#9caeb2", 0.24);
+  }
+  if (id === "delivery") {
+    for (let x = -5; x <= 5; x++) ground(x, 23, 0.55, 2, "#fff4df", 0.75);
+    mesh.push(
+      ...box(-5.55, 0.25, 19, 1.85, 2.2, 4.9, "#d1ceae"),
+      ...box(-5.55, 0.97, 16.5, 1.65, 0.9, 0.15, "#577276"),
+    );
+  }
+  if (id === "lanes") {
+    for (let z = 0; z < 24; z += 4) ground(-3, z, 0.1, 2, "#fff4df", 0.7);
+    ground(-3, 29, 0.1, 10, "#fff4df", 0.7);
+    for (const x of [-4.5, -1.5]) {
+      ground(x, 20, 0.17, 3, "#fff4df", 0.7);
+      mesh.push(
+        face(
+          x === -4.5
+            ? [
+                [x - 0.45, 0.03, 21.3],
+                [x + 0.45, 0.03, 21.3],
+                [x, 0.03, 22.2],
+              ]
+            : [
+                [x, 0.03, 21.65],
+                [x + 0.9, 0.03, 21.4],
+                [x, 0.03, 20.85],
+              ],
+          "#fff4df",
+          0.8,
+        ),
+      );
+    }
+    mesh.push(
+      ...box(-6.5, 0, 17, 0.14, 5, 0.14, "#57716e"),
+      ...box(-4, 4.9, 17, 5.2, 0.12, 0.14, "#57716e"),
+      ...box(-3, 4.35, 17, 5.3, 0.8, 0.2, "#2d667d"),
+    );
+  }
   for (const sx of [-1, 1])
     for (const sz of [-1, 1]) {
       mesh.push(
@@ -98,20 +141,22 @@ export function urbanWorld(id: UrbanId) {
       ground(s * junction.cross, J + i, 2.1, 0.54, "#f4eee2", 0.7);
     }
   // An ochre route arrow is painted on the approach and a green gate marks the exit.
-  ground(-3, 24, 0.21, 2.6, "#fff1c9", 0.75);
-  ground(-3 + cfg.turn * 0.53, 25.2, 1.2, 0.22, "#fff1c9", 0.75);
+  if (id !== "lanes") ground(-3, 24, 0.21, 2.6, "#fff1c9", 0.75);
+  if (id !== "lanes")
+    ground(-3 + cfg.turn * 0.53, 25.2, 1.2, 0.22, "#fff1c9", 0.75);
   const tip = -3 + cfg.turn * 1.6;
-  mesh.push(
-    face(
-      [
-        [tip, 0.02, 25.2],
-        [tip - cfg.turn * 0.67, 0.02, 24.65],
-        [tip - cfg.turn * 0.67, 0.02, 25.75],
-      ],
-      "#fff1c9",
-      0.76,
-    ),
-  );
+  if (id !== "lanes")
+    mesh.push(
+      face(
+        [
+          [tip, 0.02, 25.2],
+          [tip - cfg.turn * 0.67, 0.02, 24.65],
+          [tip - cfg.turn * 0.67, 0.02, 25.75],
+        ],
+        "#fff1c9",
+        0.76,
+      ),
+    );
   const exitZ = J + cfg.turn * 3,
     exitX = cfg.turn * junction.finish;
   for (const end of [-1, 1])
@@ -198,11 +243,15 @@ function disc(x: number, y: number, z: number, r: number, color: string): Face {
   ]);
   return face(pts, color);
 }
-export function urbanActors(id: UrbanId, time: number) {
+export function urbanActors(id: UrbanId, player: Car) {
+  const time = player.elapsed;
   const mesh: Face[] = [],
-    phase = phaseAt(time),
+    phase =
+      id === "lanes"
+        ? ({ vehicle: "red", walk: "red" } as const)
+        : phaseAt(time),
     cfg = districts[id],
-    { people, cars } = trafficAt(id, time);
+    { people, cars } = trafficAt(id, time, player.variant);
   for (const s of [-1, 1]) {
     const z = J + s * 9,
       x = -s * 2.8;
@@ -216,7 +265,7 @@ export function urbanActors(id: UrbanId, time: number) {
           5.45,
           front,
           0.285,
-          state === phase.vehicle
+          state === (id === "lanes" ? "red" : phase.vehicle)
             ? { red: "#ff5443", green: "#41f0b1", amber: "#ffd254" }[state]
             : "#405257",
         ),
@@ -247,6 +296,66 @@ export function urbanActors(id: UrbanId, time: number) {
       );
     }
   }
+  if (id === "lanes") {
+    const x = -2.8,
+      z = J + 8.78,
+      y = 4.69,
+      c = arrowOn(time) ? "#62ffc2" : "#42505a";
+    mesh.push(
+      ...box(x, y - 0.3, z, 1.2, 0.57, 0.2, "#253641"),
+      ...box(x - 0.07, y - 0.03, z - 0.12, 0.62, 0.105, 0.04, c),
+      face(
+        [
+          [x + 0.04, y + 0.18, z - 0.15],
+          [x + 0.44, y + 0.02, z - 0.15],
+          [x + 0.04, y - 0.19, z - 0.15],
+        ],
+        c,
+      ),
+    );
+  }
+  if (id === "queue")
+    for (const d of [0, 5.5]) {
+      const x = queueTail(time) + d;
+      if (x < 80)
+        mesh.push(
+          ...box(x, 0.25, J + 3, 4, 1, 1.85, d ? "#c9865b" : "#a3b8c8"),
+          ...box(x + 0.12, 1.23, J + 3, 2.5, 0.6, 1.65, "#71848b"),
+          ...box(x - 2, 0.68, J + 3, 0.1, 0.14, 1.5, "#db6748"),
+        );
+    }
+  const { walker, cyclist, lead } = lessonActors(id, player);
+  if (lead && lead.z < J + 65)
+    mesh.push(
+      ...box(lead.x, 0.28, lead.z, 1.8, 0.95, 4, "#9a6d50"),
+      ...box(lead.x, 1.1, lead.z, 1.63, 0.65, 2.65, "#728690"),
+      ...box(lead.x, 0.7, lead.z - 2, 1.4, 0.14, 0.08, "#ff6745"),
+    );
+  if (cyclist && cyclist.z < J + 45) {
+    const { x, z } = cyclist;
+    for (const dz of [-0.63, 0.63]) {
+      const rim: V[] = Array.from({ length: 12 }, (_, n) => [
+        x,
+        0.39 + 0.37 * Math.cos((n * Math.PI) / 6),
+        z + dz + 0.37 * Math.sin((n * Math.PI) / 6),
+      ]);
+      mesh.push(face(rim, "#25383a"));
+    }
+    mesh.push(
+      ...box(x, 0.65, z, 0.12, 0.17, 1.3, "#db7156"),
+      ...box(x, 0.93, z, 0.4, 0.63, 0.43, "#f1be3b"),
+      ...box(x, 1.56, z, 0.29, 0.31, 0.29, "#c48e66"),
+      ...box(x, 1.84, z, 0.32, 0.09, 0.33, "#f0f3e9"),
+    );
+  }
+  if (walker)
+    people.push({
+      ...walker,
+      crossing: walker.active,
+      walking: walker.active,
+      vz: 0,
+      color: "#ffbd40",
+    });
   for (const car of cars) {
     mesh.push(
       ...box(car.x, 0.29, car.z, 1.76, 0.74, 3.9, car.color),
@@ -270,6 +379,7 @@ export function urbanActors(id: UrbanId, time: number) {
     const step = p.walking ? Math.sin(time * 7) * 0.17 : 0;
     mesh.push(
       ...box(p.x, 0.79, p.z, 0.44, 0.69, 0.3, p.color),
+      ...box(p.x, 1.14, p.z, 0.47, 0.11, 0.33, "#fff3b4"),
       ...box(p.x, 1.48, p.z, 0.28, 0.3, 0.27, "#d9ad8e"),
       ...box(p.x - 0.11, 0, p.z + step, 0.16, 0.82, 0.19, "#424f5a"),
       ...box(p.x + 0.11, 0, p.z - step, 0.16, 0.82, 0.19, "#424f5a"),

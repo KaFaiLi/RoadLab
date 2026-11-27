@@ -20,3 +20,5 @@ Run the local commands in README.md. Check unique IDs, option and scene referenc
 The first-person driving mode lives in src/features/drive. simulation.ts updates the car and checkpoint rules in metres and seconds. world.ts builds the meshes, render.ts projects them from the driver's seat, and Drive.tsx manages input, pause and the animation lifecycle. Run the drive-through simulation test and the production browser smoke test when changing controls, geometry or course goals.
 
 Urban route configuration, signal timing and conflict checks live in src/features/drive/urban.ts. The world renderer and the simulation use the same actor positions and signal state. Exercise red and amber entry, both yielding conflicts, and a complete pedal-and-steering run for each new route.
+
+The lesson actors in encounters.ts are shared between rendering and assessment. Civic variants are stable IDs 0–2. Keep event descriptions factual and award skills only from observed driving behavior. History version 1 accepts older records with no drives field.

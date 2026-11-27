@@ -1,3 +1,4 @@
+import type { DriveEvent } from "../../content/drivingLessons";
 // Coordinates and vehicle dimensions are metres. Positive Z is down the course.
 export const course = { stop: 42, crossing: 94, finish: 150, halfWidth: 4.4 };
 export const roadX = (z: number) =>
@@ -16,6 +17,11 @@ export const neutral = (): Controls => ({
   right: false,
 });
 export type Result =
+  | "queue"
+  | "bike"
+  | "rear"
+  | "van"
+  | "arrow"
   | "red"
   | "amber"
   | "opposing"
@@ -27,6 +33,9 @@ export type Result =
   | "curb"
   | "complete";
 export type Car = {
+  variant: number;
+  events: DriveEvent[];
+  encounterAt: number | null;
   elapsed: number;
   entered: boolean;
   amberPass: boolean;
@@ -43,6 +52,9 @@ export type Car = {
 };
 export function spawn(): Car {
   return {
+    variant: 0,
+    events: [],
+    encounterAt: null,
     elapsed: 0,
     entered: false,
     amberPass: false,
@@ -63,6 +75,7 @@ export const pedestrianX = (car: Car) =>
 export function drive(car: Car, keys: Controls, dt: number) {
   if (car.result) return;
   dt = Math.min(0.05, Math.max(0, dt));
+  car.elapsed += dt;
   advanceVehicle(car, keys, dt);
   const offset = car.x - roadX(car.z);
   car.offLane = offset > -0.4 ? car.offLane + dt : 0;
@@ -106,12 +119,16 @@ export function advanceVehicle(
   keys: Controls,
   dt: number,
   steeringAngle = 0.36,
+  grip = 1,
 ) {
   const target = Number(keys.right) - Number(keys.left);
   car.steer += (target - car.steer) * Math.min(1, dt * 6);
   car.speed = Math.max(
     0,
-    Math.min(11.1, car.speed + dt * (keys.brake ? -7 : keys.gas ? 2.8 : -0.9)),
+    Math.min(
+      11.1,
+      car.speed + dt * (keys.brake ? -7 * grip : keys.gas ? 2.8 * grip : -0.9),
+    ),
   );
   car.yaw += ((car.speed * Math.tan(car.steer * steeringAngle)) / 2.65) * dt;
   car.x += Math.sin(car.yaw) * car.speed * dt;

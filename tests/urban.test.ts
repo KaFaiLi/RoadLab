@@ -47,7 +47,7 @@ describe("urban intersection conflicts", () => {
     const oncoming = { ...turn, x: 0.3, elapsed: 10 };
     urbanDrive(oncoming, neutral(), 0.02, "avenue");
     expect(oncoming.result).toBe("opposing");
-    const pedestrian = { ...turn, x: 9.2, elapsed: 25 };
+    const pedestrian = { ...turn, x: 9.2, elapsed: 21.5 };
     urbanDrive(pedestrian, neutral(), 0.02, "avenue");
     expect(pedestrian.result).toBe("walk");
     const empty = { ...turn, x: 9.2, elapsed: 10 };
@@ -79,16 +79,24 @@ describe("urban intersection conflicts", () => {
     urbanDrive(car, neutral(), 0.02, "avenue");
     expect(car.result).toBe("stop");
   });
-  it.each(Object.keys(districts) as UrbanId[])(
-    "can drive %s from spawn through a legal ninety-degree turn to the destination",
-    (id) => {
-      const car = urbanSpawn(),
+  it.each([
+    ...(Object.keys(districts) as UrbanId[]).map((id) => ({ id, variant: 0 })),
+    { id: "avenue" as const, variant: 1 },
+    { id: "avenue" as const, variant: 2 },
+  ])(
+    "can drive $id encounter $variant through a legal ninety-degree turn to the destination",
+    ({ id, variant }) => {
+      const car = urbanSpawn(id, variant),
         s = districts[id].turn,
         radius = s === 1 ? 9 : 7;
       const endZ = junction.z + s * 3,
         startZ = endZ - radius;
       const path: { x: number; z: number }[] = [];
-      for (let z = 0; z < startZ; z += 0.3) path.push({ x: -3, z });
+      for (let z = 0; z < startZ; z += 0.3)
+        path.push({
+          x: id === "lanes" ? -4.5 + Math.min(1, z / 18) * 2.85 : -3,
+          z,
+        });
       for (let a = 0; a <= Math.PI / 2; a += 0.025)
         path.push({
           x: -3 + s * radius * (1 - Math.cos(a)),
@@ -112,19 +120,29 @@ describe("urban intersection conflicts", () => {
         const stop =
           car.elapsed < 26 &&
           !car.entered &&
-          junction.line - car.z - 2 < 2 + car.speed ** 2 / 14;
+          junction.line - car.z - 2 <
+            2 + car.speed ** 2 / (id === "snow" ? 6 : 14);
         const sideStop =
           id === "avenue" &&
           !car.stopped &&
           car.x > 15 &&
           junction.secondaryLine - car.x - 2 < 1.8 + car.speed ** 2 / 14;
-        input.brake = stop || sideStop;
+        const vanStop =
+          id === "delivery" &&
+          car.z < 23 &&
+          car.elapsed < (car.encounterAt ?? 0) + 12 &&
+          20 - car.z < 1.5 + car.speed ** 2 / 14;
+        const winterStop =
+          id === "snow" &&
+          car.elapsed < (car.encounterAt ?? 0) + 12 &&
+          19 - car.z < 2 + car.speed ** 2 / 6;
+        input.brake = stop || sideStop || vanStop || winterStop;
         input.gas = !input.brake && car.speed < 4.5;
         waited ||= stop && car.speed === 0;
         urbanDrive(car, input, 1 / 60, id);
       }
-      expect(waited).toBe(true);
       expect(car.result, JSON.stringify(car)).toBe("complete");
+      expect(waited).toBe(true);
     },
   );
 });

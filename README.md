@@ -49,3 +49,9 @@ The town uses original polygon meshes, a moving perspective camera and a Canvas 
 ### Urban intersections
 
 Use the driving route selector to choose **Market street** (left turn across a pedestrian crossing), **Station road** (right turn across opposing through traffic), or **Civic avenue** (both conflicts in one right turn). Approach, steer through the actual junction and stay on the left of the exit street until the green destination gate. Hold Q or E, or the look buttons, to check the sides. The signal strip identifies the approach, opposing and pedestrian aspects. Traffic and pedestrians move on the simulation clock while the player waits. Pausing freezes the entire scene. Civic avenue continues to a second intersection with a stop sign after the turn. Changing routes while paused starts a fresh attempt.
+
+### Driving lessons and progress
+
+Nine routes are available in the cockpit. New lessons cover a blocked station exit, a shopper emerging behind a delivery van, a cyclist approaching in the left mirror, a designated right-turn lane with a protected arrow, and braking behind a lead vehicle on snow. Civic Avenue offers three fixed, replayable encounter schedules. Select one before starting, repeat the same encounter, or choose the next variation from the result screen.
+
+The decision review shows timed observations, waits and the outcome. The Progress screen counts demonstrated driving skills separately from quiz accuracy. Driving summaries share the existing local export, import and reset controls. Earlier exports remain compatible.
