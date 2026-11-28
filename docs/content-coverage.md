@@ -46,3 +46,9 @@ Checked 2026-11-27 for ordinary passenger cars. Civic Avenue has three reproduci
 | Hokkaido winter approach         | Article 26 covers following distance. The regional winter guide describes extended stopping distances on packed snow and ice. Grip, visibility and operating margins in the simulation are coaching parameters.             |
 
 [Road Traffic Act](https://laws.e-gov.go.jp/law/335AC0000000105) · [Enforcement Order](https://laws.e-gov.go.jp/law/335CO0000000270) · [Hokkaido winter driving guide, p. 1](https://hokkaido-safe-travel.mlit.go.jp/images/pdf/winter_drive_eng.pdf)
+
+## Forty field drives
+
+Five playable routes each cover school and residential streets, public transport, shopping streets, roadworks, rail crossings, country roads, harbour roads and Hokkaido winter roads. Each has an ordered set of three encounters. For example, the morning school gate combines a 20 km/h zone, two pedestrians arriving from opposite sides and a stop-controlled side street. At the station drop-off, a red signal precedes a queue blocking the far side of a pedestrian crossing. Players encounter both a moving pedestrian and limited exit space there.
+
+Japanese ordinary passenger cars in left-hand traffic are the reference vehicle. The training rules draw on the Road Traffic Act, Articles 22 (speed), 26 (following distance), 33 (railway crossings), 38 (pedestrian crossings) and 43 (designated stops). Railway exercises depict crossings without a controlling road traffic signal. The NPA guide covers stopping at level crossings and giving way at pedestrian crossings. Winter grip, signal timers, wildlife paths and cone clearances are gameplay parameters. Source passages checked 2026-11-28. [Road Traffic Act](https://laws.e-gov.go.jp/law/335AC0000000105) · [NPA driving guide](https://www.npa.go.jp/english/bureau/traffic/document/r8_followtherules_en02.pdf) · [Hokkaido winter driving](https://hokkaido-safe-travel.mlit.go.jp/images/pdf/winter_drive_eng.pdf)

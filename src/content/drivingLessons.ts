@@ -1,5 +1,25 @@
 import { tr } from "./schema";
 export const skillText = {
+  railStop: tr(
+    "Stopped and cleared the railway crossing",
+    "停車後通過平交道",
+    "一時停止して踏切を通過",
+  ),
+  conePass: tr(
+    "Steered through the open lane corridor",
+    "沿車道可通行處避開路錐",
+    "コーンを避けて車線内を通過",
+  ),
+  postedSpeed: tr(
+    "Observed the posted speed zone",
+    "遵守區間速限",
+    "指定速度の区間を通過",
+  ),
+  busWait: tr(
+    "Waited behind the stopped bus",
+    "在停靠公車後方等候",
+    "停車中のバスの後ろで待機",
+  ),
   lightWait: tr(
     "Stopped before the signal",
     "在號誌前停車",

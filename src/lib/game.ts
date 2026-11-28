@@ -1,3 +1,4 @@
+import { fieldById } from "../content/fieldDrives";
 import { skillText, type Skill } from "../content/drivingLessons";
 import { z } from "zod";
 import { locales, type Locale, type Question } from "../content/schema";
@@ -22,17 +23,19 @@ export const attemptSchema = z.object({
 });
 export type Attempt = z.infer<typeof attemptSchema>;
 const driveRecordSchema = z.object({
-  route: z.enum([
-    "town",
-    "market",
-    "station",
-    "avenue",
-    "queue",
-    "delivery",
-    "cycle",
-    "lanes",
-    "snow",
-  ]),
+  route: z
+    .enum([
+      "town",
+      "market",
+      "station",
+      "avenue",
+      "queue",
+      "delivery",
+      "cycle",
+      "lanes",
+      "snow",
+    ])
+    .or(z.string().refine((id) => fieldById.has(id))),
   variant: z.number().int().min(0).max(2),
   completed: z.boolean(),
   at: z.number(),

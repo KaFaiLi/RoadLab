@@ -17,6 +17,11 @@ export const neutral = (): Controls => ({
   right: false,
 });
 export type Result =
+  | "crossTraffic"
+  | "railGate"
+  | "cones"
+  | "speedZone"
+  | "animal"
   | "queue"
   | "bike"
   | "rear"
@@ -33,6 +38,7 @@ export type Result =
   | "curb"
   | "complete";
 export type Car = {
+  step: number;
   variant: number;
   events: DriveEvent[];
   encounterAt: number | null;
@@ -52,6 +58,7 @@ export type Car = {
 };
 export function spawn(): Car {
   return {
+    step: 0,
     variant: 0,
     events: [],
     encounterAt: null,

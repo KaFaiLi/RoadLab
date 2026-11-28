@@ -28,7 +28,18 @@ import {
 } from "../../content/drivingLessons";
 import type { DriveRecord } from "../../lib/game";
 import { arrowOn, note } from "./encounters";
-const strings = { ...copy, ...urbanCopy, ...lessonText };
+import {
+  fieldById,
+  fieldDrives,
+  fieldText,
+  fieldGroups,
+  tasks,
+  type FieldDrive,
+  type Group,
+} from "../../content/fieldDrives";
+import { fieldSpawn, fieldDrive, fieldFinish, checkpoint } from "./field";
+import { fieldWorld } from "./fieldWorld";
+const strings = { ...fieldText, ...copy, ...urbanCopy, ...lessonText };
 type Input = keyof Controls | "lookLeft" | "lookRight";
 type Phase = "ready" | "active" | "paused" | "ended";
 const keyMap: Record<string, Input> = {
@@ -50,10 +61,15 @@ export default function Drive({
   l: Locale;
   recordDrive: (r: DriveRecord) => void;
 }) {
-  const [route, setRoute] = useState<RouteId>("town");
+  const [selected, setRoute] = useState("town");
+  const field = fieldById.get(selected);
+  const route = Object.hasOwn(districts, selected)
+    ? (selected as RouteId)
+    : "town";
   return (
     <Course
-      key={route}
+      key={selected}
+      field={field}
       route={route}
       setRoute={setRoute}
       l={l}
@@ -64,18 +80,24 @@ export default function Drive({
 function Course({
   l,
   route,
+  field,
   setRoute,
   recordDrive,
 }: {
   l: Locale;
   route: RouteId;
+  field?: FieldDrive;
   recordDrive: (r: DriveRecord) => void;
-  setRoute: (id: RouteId) => void;
+  setRoute: (id: string) => void;
 }) {
   const urban = route !== "town",
     district = urban ? districts[route] : null;
   const newCar = (variant = 0) =>
-    route === "town" ? spawn() : urbanSpawn(route, variant);
+    field
+      ? fieldSpawn()
+      : route === "town"
+        ? spawn()
+        : urbanSpawn(route, variant);
   const canvas = useRef<HTMLCanvasElement>(null),
     car = useRef(newCar()),
     held = useRef(new Map<string, Input>());
@@ -90,7 +112,11 @@ function Course({
       setAvailable(false);
       return;
     }
-    const world = route === "town" ? makeWorld() : urbanWorld(route);
+    const world = field
+      ? fieldWorld(field)
+      : route === "town"
+        ? makeWorld()
+        : urbanWorld(route);
     let look = 0;
     let frame = 0,
       last = 0,
@@ -152,7 +178,8 @@ function Course({
           district.turn * look > 0.6
         )
           note(car.current, "looked");
-        if (route === "town") {
+        if (field) fieldDrive(car.current, keys, dt, field);
+        else if (route === "town") {
           drive(car.current, keys, dt);
           if (car.current.stopped) note(car.current, "sideStop");
           if (car.current.crossed) note(car.current, "walkWait");
@@ -169,13 +196,21 @@ function Course({
         car.current,
         world,
         route,
-        urban ? (route === "cycle" && look < 0 ? look * 2.2 : look) : 0,
+        field
+          ? look
+          : urban
+            ? route === "cycle" && look < 0
+              ? look * 2.2
+              : look
+            : 0,
+        false,
+        field,
       );
       last = time;
       if (phase === "active") {
         if (car.current.result) {
           recordDrive({
-            route,
+            route: field?.id ?? route,
             variant: car.current.variant,
             at: Date.now(),
             completed: car.current.result === "complete",
@@ -205,7 +240,7 @@ function Course({
       window.removeEventListener("blur", pause);
       document.removeEventListener("visibilitychange", visibility);
     };
-  }, [phase, route, urban, district, recordDrive]);
+  }, [phase, route, urban, district, field, recordDrive]);
   const stage = !snapshot.stopped
     ? "first"
     : !snapshot.crossed
@@ -225,8 +260,17 @@ function Course({
         2,
     ),
   );
-  const name = district ? district.name[l] : text("route");
-  const routeLength = urban ? junction.z + junction.finish : course.finish;
+  const task = field?.stages[snapshot.step];
+  const name = field
+    ? field.name[l]
+    : district
+      ? district.name[l]
+      : text("route");
+  const routeLength = field
+    ? fieldFinish
+    : urban
+      ? junction.z + junction.finish
+      : course.finish;
   const progress =
     route === "town" ? snapshot.z + 2 : urbanProgress(snapshot, route);
   const hint =
@@ -297,14 +341,25 @@ function Course({
         {text("choose")}
         <select
           disabled={phase === "active"}
-          value={route}
-          onChange={(e) => setRoute(e.target.value as RouteId)}
+          value={field?.id ?? route}
+          onChange={(e) => setRoute(e.target.value)}
         >
           <option value="town">{text("route")}</option>
           {Object.entries(districts).map(([id, d]) => (
             <option key={id} value={id}>
               {d.name[l]}
             </option>
+          ))}
+          {(Object.keys(fieldGroups) as Group[]).map((group) => (
+            <optgroup key={group} label={fieldGroups[group][l]}>
+              {fieldDrives
+                .filter((d) => d.group === group)
+                .map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name[l]}
+                  </option>
+                ))}
+            </optgroup>
           ))}
         </select>
       </label>
@@ -332,7 +387,7 @@ function Course({
         <canvas
           ref={canvas}
           role="img"
-          aria-label={text(urban ? "urbanView" : "view")}
+          aria-label={text(field ? "fieldView" : urban ? "urbanView" : "view")}
         />
         {route === "cycle" && (
           <small className="mirror-label">{text("mirror")}</small>
@@ -341,22 +396,34 @@ function Course({
           <div>
             <i />
             <span aria-live="polite">
-              {checkSide
-                ? text(
-                    route === "cycle"
-                      ? "bikeCheck"
-                      : district.turn === 1
-                        ? "inspectRight"
-                        : "inspectLeft",
-                  )
-                : text(hint)}
+              {field
+                ? task
+                  ? snapshot.step + 1 + "/3 · " + tasks[task][l]
+                  : text("fieldFinishCue")
+                : checkSide
+                  ? text(
+                      route === "cycle"
+                        ? "bikeCheck"
+                        : district.turn === 1
+                          ? "inspectRight"
+                          : "inspectLeft",
+                    )
+                  : text(hint)}
             </span>
           </div>
-          {stage !== "wait" && (
+          {(field || stage !== "wait") && (
             <strong>
-              {urban
-                ? Math.max(0, Math.round(routeLength - progress))
-                : distance}{" "}
+              {field
+                ? Math.max(
+                    0,
+                    Math.round(
+                      (task ? checkpoint(snapshot.step) : fieldFinish) -
+                        progress,
+                    ),
+                  )
+                : urban
+                  ? Math.max(0, Math.round(routeLength - progress))
+                  : distance}{" "}
               m
             </strong>
           )}
@@ -403,6 +470,27 @@ function Course({
       ) : phase === "ready" || phase === "ended" ? (
         <div className="drive-brief">
           <div>
+            {field && (
+              <>
+                <p className="urban-sources">
+                  <a href={sources.npa.url}>{ui.source[l]} · NPA ↗</a>
+                  {field.group === "winter" && (
+                    <>
+                      {" "}
+                      ·{" "}
+                      <a href={sources.winter.url}>{text("winterSource")} ↗</a>
+                    </>
+                  )}
+                </p>
+                {phase === "ready" && (
+                  <ol>
+                    {field.stages.map((t) => (
+                      <li key={t}>{tasks[t][l]}</li>
+                    ))}
+                  </ol>
+                )}
+              </>
+            )}
             {urban && (
               <p className="urban-sources">
                 <a href="https://laws.e-gov.go.jp/law/335CO0000000270">
@@ -428,14 +516,18 @@ function Course({
             )}
             <p>
               {phase === "ready"
-                ? district
-                  ? district.brief[l]
-                  : text("brief")
+                ? field
+                  ? fieldGroups[field.group][l]
+                  : district
+                    ? district.brief[l]
+                    : text("brief")
                 : text(
                     snapshot.result === "complete"
-                      ? urban
-                        ? "urbanSuccess"
-                        : "success"
+                      ? field
+                        ? "fieldSuccess"
+                        : urban
+                          ? "urbanSuccess"
+                          : "success"
                       : (snapshot.result ?? "ended"),
                   )}
             </p>
@@ -491,7 +583,7 @@ function Course({
                 "right",
                 "brake",
                 "gas",
-                ...(urban ? (["lookLeft", "lookRight"] as const) : []),
+                ...(urban || field ? (["lookLeft", "lookRight"] as const) : []),
               ] as const
             ).map((k) => (
               <button
@@ -541,9 +633,9 @@ function Course({
           </div>
         </>
       )}
-      {route === "snow" && <small>{text("coaching")}</small>}
+      {(field || route === "snow") && <small>{text("coaching")}</small>}
       <p className="drive-help">
-        {text("controls")} {urban && text("lookHelp")}
+        {text("controls")} {(urban || field) && text("lookHelp")}
       </p>
     </section>
   );
