@@ -55,3 +55,5 @@ Use the driving route selector to choose **Market street** (left turn across a p
 Nine routes are available in the cockpit. New lessons cover a blocked station exit, a shopper emerging behind a delivery van, a cyclist approaching in the left mirror, a designated right-turn lane with a protected arrow, and braking behind a lead vehicle on snow. Civic Avenue offers three fixed, replayable encounter schedules. Select one before starting, repeat the same encounter, or choose the next variation from the result screen.
 
 The decision review shows timed observations, waits and the outcome. The Progress screen counts demonstrated driving skills separately from quiz accuracy. Driving summaries share the existing local export, import and reset controls. Earlier exports remain compatible.
+
+The **3D Driving School** route selector includes 40 three-encounter field drives across eight settings. Choose a route to preview its three decisions in your selected language. Drive using the pedals and steering controls, or use W/S and A/D. Q/E look left and right. Routes can be retried from the debrief, and each result is saved under the selected route.

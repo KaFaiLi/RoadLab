@@ -2,6 +2,9 @@ import { course, pedestrianX, roadX, type Car } from "./simulation";
 import { box, type Face, type V } from "./world";
 import { urbanActors } from "./urbanWorld";
 import { junction, type RouteId } from "./urban";
+import type { FieldDrive } from "../../content/fieldDrives";
+import { fieldActors } from "./fieldWorld";
+import { fieldX, checkpoint, fieldFinish } from "./field";
 type Point = [number, number];
 function polygon(ctx: CanvasRenderingContext2D, p: Point[], color: string) {
   ctx.beginPath();
@@ -19,10 +22,25 @@ export function render(
   route: RouteId = "town",
   look = 0,
   mirror = false,
+  field?: FieldDrive,
 ) {
   const sky = ctx.createLinearGradient(0, 0, 0, h * 0.62);
-  sky.addColorStop(0, "#78b4c7");
-  sky.addColorStop(1, "#fae9c7");
+  sky.addColorStop(
+    0,
+    field?.weather === "dusk"
+      ? "#696782"
+      : field && ["fog", "snow", "rain", "ice"].includes(field.weather)
+        ? "#95a8b2"
+        : "#78b4c7",
+  );
+  sky.addColorStop(
+    1,
+    field?.weather === "dusk"
+      ? "#dfae8b"
+      : field && field.weather !== "clear"
+        ? "#dce5e6"
+        : "#fae9c7",
+  );
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, w, h);
   const horizon = h * 0.43,
@@ -84,7 +102,11 @@ export function render(
       ...box(px + 0.12 + walk, 0, pz, 0.15, 0.84, 0.19, "#455764"),
     ];
   }
-  const actors = route === "town" ? townPedestrian() : urbanActors(route, car);
+  const actors = field
+    ? fieldActors(field, car)
+    : route === "town"
+      ? townPedestrian()
+      : urbanActors(route, car);
   const faces: { p: Point[]; depth: number; color: string; layer: number }[] =
     [];
   for (const item of [...world, ...actors]) {
@@ -126,7 +148,11 @@ export function render(
   faces.sort((a, b) => a.layer - b.layer || b.depth - a.depth);
   for (const f of faces) {
     polygon(ctx, f.p, f.color);
-    if (route === "snow") {
+    if (
+      route === "snow" ||
+      field?.weather === "fog" ||
+      field?.weather === "snow"
+    ) {
       ctx.globalAlpha = Math.min(0.94, Math.max(0, (f.depth - 7) / 44));
       polygon(ctx, f.p, "#e0e8eb");
       ctx.globalAlpha = 1;
@@ -134,7 +160,32 @@ export function render(
   }
   if (mirror) return;
   if (route === "lanes" && car.z < 17) label(-3, 4.64, 16.85, "↑　　　 →", 0.5);
-  if (route === "town") {
+  if (field) {
+    field.stages.forEach((task, i) => {
+      const z = checkpoint(i),
+        x = fieldX(field, z) - 5.45;
+      if (task.startsWith("limit")) {
+        const p = camera([x, 2.54, z - 0.03]);
+        if (p[2] > 0.7 && p[2] < 95) {
+          const [sx, sy] = project(p);
+          ctx.font = "bold " + (0.46 * focal) / p[2] + "px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillStyle = "#323a43";
+          ctx.fillText(task.slice(5), sx, sy);
+        }
+      } else if (task === "stop" || task === "side")
+        label(x, 2.84, z - 0.02, "止まれ", 0.22);
+      else if (task === "train" || task === "tracks" || task === "deer")
+        label(x, 2.57, z - 0.02, task === "deer" ? "鹿" : "×", 0.46);
+    });
+    label(
+      fieldX(field, fieldFinish) - 2.6,
+      3.77,
+      fieldFinish - 0.13,
+      "ROADLAB",
+      0.31,
+    );
+  } else if (route === "town") {
     label(roadX(course.stop) - 4.95, 2.82, course.stop - 0.06, "止まれ", 0.24);
     label(roadX(course.finish), 3.78, course.finish - 0.11, "ROADLAB", 0.36);
   }

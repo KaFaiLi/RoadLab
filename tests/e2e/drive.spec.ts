@@ -105,3 +105,31 @@ test("debrief, replay variation and saved driving progress survive navigation an
   await page.reload();
   await expect(page.getByText("Completed drives · 0 / 2")).toBeVisible();
 });
+
+test("browse forty grouped drives, read a translated brief and drive into a closed railway crossing", async ({
+  page,
+}) => {
+  await page.goto("./#/drive");
+  const locale = page.locator(".language select"),
+    route = page.locator(".route-select select").first();
+  await locale.selectOption("en");
+  await expect(route.locator("option")).toHaveCount(49);
+  await expect(route.locator("optgroup")).toHaveCount(8);
+  await route.selectOption("field-rail-bus");
+  await expect(page.locator(".drive-brief ol li")).toHaveCount(3);
+  await locale.selectOption("ja");
+  await expect(route.locator("option:checked")).toHaveText(
+    "踏切の先の連絡バス",
+  );
+  await locale.selectOption("en");
+  await page.getByRole("button", { name: "Start driving" }).click();
+  await expect(route).toBeDisabled();
+  await page.keyboard.down("w");
+  await expect(page.getByRole("heading", { name: "Drive ended" })).toBeVisible({
+    timeout: 18000,
+  });
+  await page.keyboard.up("w");
+  await expect(page.locator(".drive-brief")).toContainText(
+    "You passed the stop line",
+  );
+});
