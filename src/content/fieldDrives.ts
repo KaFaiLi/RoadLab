@@ -101,6 +101,8 @@ export type FieldDrive = {
   name: ReturnType<typeof tr>;
   weather: Weather;
   bend: number;
+  signalOffset?: number;
+  positions?: readonly number[];
   stages: readonly [Task, Task, Task];
 };
 function route(
@@ -606,6 +608,11 @@ export const fieldDrives = [
 ];
 export const fieldById = new Map(fieldDrives.map((d) => [d.id, d]));
 export const fieldText = {
+  trafficContact: tr(
+    "You met an oncoming vehicle in its lane. Keep left.",
+    "你在對向車道遇上來車，請靠左行駛。",
+    "対向車と接触しました。左側を走行しましょう。",
+  ),
   fieldFinishCue: tr(
     "Follow the left lane to the finish gate.",
     "沿左側車道前往終點門。",

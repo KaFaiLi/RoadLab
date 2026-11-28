@@ -1,4 +1,4 @@
-import { course, roadX } from "./simulation";
+import { course, pedestrianX, type Car, roadX } from "./simulation";
 export type V = [number, number, number];
 export type Face = { v: V[]; color: string; layer: number };
 export function face(v: V[], color: string, layer = 2): Face {
@@ -135,7 +135,7 @@ export function makeWorld() {
       "#fff6e5",
       0.4,
     );
-  strip(course.finish, course.finish + 0.55, -4.2, -0.12, 0.05, "#f7d76d", 0.4);
+
   for (const side of [-1, 1]) {
     const x = roadX(course.stop + 4),
       z = course.stop + 4;
@@ -324,12 +324,19 @@ export function makeWorld() {
       ),
     );
   }
-  for (const dx of [-4.9, 4.9]) {
-    const x = roadX(course.finish) + dx;
-    add(...box(x, 0, course.finish, 0.14, 3.8, 0.15, "#4c7264"));
-  }
-  add(
-    ...box(roadX(course.finish), 3.6, course.finish, 9.9, 0.6, 0.18, "#307863"),
-  );
   return world;
+}
+
+export function townPedestrian(car: Car) {
+  const px = pedestrianX(car),
+    pz = course.crossing + 0.4,
+    walk =
+      car.pedTime > 0 && car.pedTime < 5 ? Math.sin(car.pedTime * 8) * 0.16 : 0;
+  return [
+    ...box(px, 0.83, pz, 0.44, 0.58, 0.29, "#c36f43"),
+    ...box(px, 1.41, pz, 0.27, 0.29, 0.25, "#d8aa82"),
+    ...box(px, 1.65, pz, 0.3, 0.095, 0.27, "#514c42"),
+    ...box(px - 0.12 - walk, 0, pz, 0.15, 0.84, 0.19, "#455764"),
+    ...box(px + 0.12 + walk, 0, pz, 0.15, 0.84, 0.19, "#455764"),
+  ];
 }

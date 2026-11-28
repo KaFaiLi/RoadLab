@@ -318,3 +318,23 @@
   padding: 1px 5px;
   pointer-events: none;
 }
+.trip-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.trip-warning {
+  position: absolute;
+  bottom: 24%;
+  left: 5%;
+  right: 5%;
+  margin: 0 auto;
+  width: fit-content;
+  max-width: 90%;
+  padding: 0.55em 0.85em;
+  border-radius: 8px;
+  background: #372b20ed;
+  color: #fff6dc;
+  font-size: clamp(12px, 1.5vw, 16px);
+}

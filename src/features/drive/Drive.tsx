@@ -1,45 +1,36 @@
-import { useEffect, useRef, useState } from "react";
-import type { Locale } from "../../content/schema";
-import { rules } from "../../content";
-import { sources } from "../../content/sources";
-import { ui } from "../../content/ui";
-import { Icon } from "../../components/Icon";
-import { course, drive, neutral, spawn, type Controls } from "./simulation";
-import { render } from "./render";
-import { makeWorld } from "./world";
-import { copy } from "./strings";
-import {
-  districts,
-  urbanSpawn,
-  urbanDrive,
-  urbanProgress,
-  phaseAt,
-  junction,
-  type RouteId,
-} from "./urban";
-import { urbanWorld } from "./urbanWorld";
-import { urbanCopy } from "./urbanCopy";
-import "./drive.css";
-import {
-  eventText,
-  skillText,
-  lessonText,
-  type Skill,
-} from "../../content/drivingLessons";
+import { useEffect, useState, useRef } from "react";
+import { tr, type Locale } from "../../content/schema";
+import { fieldGroups, fieldText } from "../../content/fieldDrives";
+import { skillText, lessonText } from "../../content/drivingLessons";
 import type { DriveRecord } from "../../lib/game";
-import { arrowOn, note } from "./encounters";
-import {
-  fieldById,
-  fieldDrives,
-  fieldText,
-  fieldGroups,
-  tasks,
-  type FieldDrive,
-  type Group,
-} from "../../content/fieldDrives";
-import { fieldSpawn, fieldDrive, fieldFinish, checkpoint } from "./field";
-import { fieldWorld } from "./fieldWorld";
-const strings = { ...fieldText, ...copy, ...urbanCopy, ...lessonText };
+import { Icon } from "../../components/Icon";
+import { neutral, type Controls } from "./simulation";
+import { districts } from "./urban";
+import { urbanCopy } from "./urbanCopy";
+import { copy } from "./strings";
+import { render } from "./render";
+import { createJourney, advanceJourney, journeyWorld } from "./journey";
+import "./drive.css";
+
+const strings = {
+  ...copy,
+  ...urbanCopy,
+  ...fieldText,
+  ...lessonText,
+  openRoad: tr("Open road", "自由駕駛", "フリードライブ"),
+  overview: tr(
+    "Keep left and follow the turn directions. Read the signs and watch the traffic. Pause when you want to end your drive.",
+    "靠左行駛並依提示轉彎，留意道路標誌與車流。想結束行程時請按暫停。",
+    "左側を走り、案内に沿って曲がりましょう。標識や交通の流れに注意し、終了するときは一時停止してください。",
+  ),
+  straight: tr("Continue ahead", "繼續直行", "道なりに直進"),
+  goLeft: tr("← Turn left at the junction", "← 在路口左轉", "← 交差点を左折"),
+  goRight: tr("Turn right at the junction →", "在路口右轉 →", "交差点を右折 →"),
+  endTrip: tr("End drive", "結束駕駛", "運転を終了"),
+  tripSummary: tr("Trip summary", "行程回顧", "走行記録"),
+  travelled: tr("Distance driven", "行駛距離", "走行距離"),
+  incidents: tr("Incidents", "事件次數", "注意を受けた回数"),
+};
 type Input = keyof Controls | "lookLeft" | "lookRight";
 type Phase = "ready" | "active" | "paused" | "ended";
 const keyMap: Record<string, Input> = {
@@ -61,49 +52,23 @@ export default function Drive({
   l: Locale;
   recordDrive: (r: DriveRecord) => void;
 }) {
-  const [selected, setRoute] = useState("town");
-  const field = fieldById.get(selected);
-  const route = Object.hasOwn(districts, selected)
-    ? (selected as RouteId)
-    : "town";
-  return (
-    <Course
-      key={selected}
-      field={field}
-      route={route}
-      setRoute={setRoute}
-      l={l}
-      recordDrive={recordDrive}
-    />
-  );
-}
-function Course({
-  l,
-  route,
-  field,
-  setRoute,
-  recordDrive,
-}: {
-  l: Locale;
-  route: RouteId;
-  field?: FieldDrive;
-  recordDrive: (r: DriveRecord) => void;
-  setRoute: (id: string) => void;
-}) {
-  const urban = route !== "town",
-    district = urban ? districts[route] : null;
-  const newCar = (variant = 0) =>
-    field
-      ? fieldSpawn()
-      : route === "town"
-        ? spawn()
-        : urbanSpawn(route, variant);
-  const canvas = useRef<HTMLCanvasElement>(null),
-    car = useRef(newCar()),
-    held = useRef(new Map<string, Input>());
+  const [session] = useState(() => ({ current: createJourney() }));
   const [phase, setPhase] = useState<Phase>("ready"),
-    [snapshot, setSnapshot] = useState(() => ({ ...car.current })),
     [available, setAvailable] = useState(true);
+  const canvas = useRef<HTMLCanvasElement>(null),
+    held = useRef(new Map<string, Input>());
+  const view = () => {
+    const j = session.current;
+    return {
+      street: j.street,
+      distance: Math.floor(j.distance),
+      car: { ...j.car },
+      warning: j.time < j.warningUntil ? j.warning : null,
+      incidents: j.incidents,
+      skills: [...j.skills],
+    };
+  };
+  const [snapshot, setSnapshot] = useState(view);
   const text = (k: keyof typeof strings) => strings[k][l];
   useEffect(() => {
     const el = canvas.current,
@@ -112,13 +77,8 @@ function Course({
       setAvailable(false);
       return;
     }
-    const world = field
-      ? fieldWorld(field)
-      : route === "town"
-        ? makeWorld()
-        : urbanWorld(route);
-    let look = 0;
-    let frame = 0,
+    let look = 0,
+      frame = 0,
       last = 0,
       reported = 0;
     const clear = () => held.current.clear();
@@ -171,56 +131,27 @@ function Course({
             Number(inputs.has("lookLeft")) -
             look) *
           Math.min(1, dt * 10);
-        if (
-          district &&
-          car.current.z > 22 &&
-          district.turn * car.current.x < 9 &&
-          district.turn * look > 0.6
-        )
-          note(car.current, "looked");
-        if (field) fieldDrive(car.current, keys, dt, field);
-        else if (route === "town") {
-          drive(car.current, keys, dt);
-          if (car.current.stopped) note(car.current, "sideStop");
-          if (car.current.crossed) note(car.current, "walkWait");
-        } else urbanDrive(car.current, keys, dt, route);
-        if (time - reported > 90 || car.current.result) {
-          setSnapshot({ ...car.current });
+        advanceJourney(session.current, keys, dt, look);
+        if (time - reported > 95) {
+          setSnapshot(view());
           reported = time;
         }
       }
+      const { car, street } = session.current;
       render(
         ctx,
         w,
         h,
-        car.current,
-        world,
-        route,
-        field
-          ? look
-          : urban
-            ? route === "cycle" && look < 0
-              ? look * 2.2
-              : look
-            : 0,
+        car,
+        journeyWorld(session.current),
+        street.route,
+        street.route === "cycle" && look < 0 ? look * 2.2 : look,
         false,
-        field,
+        street.field,
+        street.weather,
       );
       last = time;
-      if (phase === "active") {
-        if (car.current.result) {
-          recordDrive({
-            route: field?.id ?? route,
-            variant: car.current.variant,
-            at: Date.now(),
-            completed: car.current.result === "complete",
-            skills: car.current.events
-              .filter((e) => Object.hasOwn(skillText, e.key))
-              .map((e) => e.key as Skill),
-          });
-          setPhase("ended");
-        } else frame = requestAnimationFrame(paint);
-      }
+      if (phase === "active") frame = requestAnimationFrame(paint);
     }
     const resize = new ResizeObserver(() => {
       if (phase !== "active") paint(performance.now());
@@ -240,83 +171,31 @@ function Course({
       window.removeEventListener("blur", pause);
       document.removeEventListener("visibilitychange", visibility);
     };
-  }, [phase, route, urban, district, field, recordDrive]);
-  const stage = !snapshot.stopped
-    ? "first"
-    : !snapshot.crossed
-      ? "second"
-      : snapshot.pedTime < 5
-        ? "wait"
-        : "third";
-  const distance = Math.max(
-    0,
-    Math.round(
-      (stage === "first"
-        ? course.stop
-        : stage === "third"
-          ? course.finish
-          : course.crossing - 2) -
-        snapshot.z -
-        2,
-    ),
-  );
-  const task = field?.stages[snapshot.step];
-  const name = field
-    ? field.name[l]
-    : district
-      ? district.name[l]
-      : text("route");
-  const routeLength = field
-    ? fieldFinish
-    : urban
-      ? junction.z + junction.finish
-      : course.finish;
-  const progress =
-    route === "town" ? snapshot.z + 2 : urbanProgress(snapshot, route);
-  const hint =
-    route === "lanes" && snapshot.z < 24
-      ? "selectLane"
-      : route === "cycle" && snapshot.x > -9
-        ? "riverTurn"
-        : route === "avenue" &&
-            snapshot.x > junction.cross + 2 &&
-            !snapshot.stopped
-          ? "sideStop"
-          : district
-            ? district.turn * snapshot.x > junction.cross + 2
-              ? "exit"
-              : district.turn === 1
-                ? "turnRight"
-                : "turnLeft"
-            : stage;
-  const signals = phaseAt(snapshot.elapsed);
-  const showSignals =
-    urban && (district?.turn ?? 1) * snapshot.x < junction.cross + 2;
-  const checkSide =
-    (route === "avenue" || route === "market" || route === "cycle") &&
-    phase === "active" &&
-    district &&
-    snapshot.z > 24 &&
-    district.turn * snapshot.x < 8 &&
-    !snapshot.events.some((e) => e.key === "looked");
-
-  const lamp = (s: typeof signals.vehicle | typeof signals.walk) =>
-    text(s === "red" ? "redLight" : s === "amber" ? "yellow" : s);
-  const rule = rules.find(
-    (r) =>
-      r.id ===
-      (snapshot.result === "yield"
-        ? "cross"
-        : snapshot.result === "lane"
-          ? "left"
-          : "stop"),
-  );
-  function start(variant = snapshot.variant) {
-    if (phase !== "paused") {
-      car.current = newCar(variant);
-      setSnapshot({ ...car.current });
+  }, [phase, session]);
+  const { street, car } = snapshot;
+  const turn = street.route === "town" ? 0 : districts[street.route].turn;
+  const direction =
+    turn && turn * car.x < 12 ? (turn < 0 ? "goLeft" : "goRight") : "straight";
+  function start() {
+    if (phase === "ended") {
+      session.current = createJourney();
+      setSnapshot(view());
     }
     setPhase("active");
+  }
+  function end() {
+    const j = session.current;
+    recordDrive({
+      route: "journey",
+      variant: 0,
+      at: Date.now(),
+      completed: true,
+      distance: Math.floor(j.distance),
+      incidents: j.incidents,
+      skills: [...j.skills],
+    });
+    setSnapshot(view());
+    setPhase("ended");
   }
   return (
     <section className="driving">
@@ -324,7 +203,7 @@ function Course({
         <div>
           <small className="kicker">
             <Icon name="road" />
-            {name} · {routeLength} m
+            {text("openRoad")}
           </small>
           <h1>{text("title")}</h1>
         </div>
@@ -337,242 +216,63 @@ function Course({
           </button>
         )}
       </div>
-      <label className="route-select">
-        {text("choose")}
-        <select
-          disabled={phase === "active"}
-          value={field?.id ?? route}
-          onChange={(e) => setRoute(e.target.value)}
-        >
-          <option value="town">{text("route")}</option>
-          {Object.entries(districts).map(([id, d]) => (
-            <option key={id} value={id}>
-              {d.name[l]}
-            </option>
-          ))}
-          {(Object.keys(fieldGroups) as Group[]).map((group) => (
-            <optgroup key={group} label={fieldGroups[group][l]}>
-              {fieldDrives
-                .filter((d) => d.group === group)
-                .map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name[l]}
-                  </option>
-                ))}
-            </optgroup>
-          ))}
-        </select>
-      </label>
-      {route === "avenue" && (
-        <label className="route-select">
-          {text("variant")}
-          <select
-            value={snapshot.variant}
-            disabled={phase === "active" || phase === "paused"}
-            onChange={(e) => {
-              car.current = newCar(Number(e.target.value));
-              setSnapshot({ ...car.current });
-              setPhase("ready");
-            }}
-          >
-            {[0, 1, 2].map((n) => (
-              <option key={n} value={n}>
-                {n + 1} / 3
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
       <div className="windshield">
-        <canvas
-          ref={canvas}
-          role="img"
-          aria-label={text(field ? "fieldView" : urban ? "urbanView" : "view")}
-        />
-        {route === "cycle" && (
+        <canvas ref={canvas} role="img" aria-label={text("fieldView")} />
+        {street.route === "cycle" && (
           <small className="mirror-label">{text("mirror")}</small>
         )}
         <div className="drive-hud">
           <div>
             <i />
-            <span aria-live="polite">
-              {field
-                ? task
-                  ? snapshot.step + 1 + "/3 · " + tasks[task][l]
-                  : text("fieldFinishCue")
-                : checkSide
-                  ? text(
-                      route === "cycle"
-                        ? "bikeCheck"
-                        : district.turn === 1
-                          ? "inspectRight"
-                          : "inspectLeft",
-                    )
-                  : text(hint)}
-            </span>
+            <span>{text(direction)}</span>
           </div>
-          {(field || stage !== "wait") && (
-            <strong>
-              {field
-                ? Math.max(
-                    0,
-                    Math.round(
-                      (task ? checkpoint(snapshot.step) : fieldFinish) -
-                        progress,
-                    ),
-                  )
-                : urban
-                  ? Math.max(0, Math.round(routeLength - progress))
-                  : distance}{" "}
-              m
-            </strong>
-          )}
+          <strong aria-label={text("travelled")}>{snapshot.distance} m</strong>
         </div>
+        {snapshot.warning && phase === "active" && (
+          <p role="status" className="trip-warning">
+            {text(snapshot.warning)}
+          </p>
+        )}
         {phase === "paused" && (
           <div className="drive-shade">
-            <button className="button warm" onClick={() => start()}>
-              {text("resume")} ▸
-            </button>
+            <div className="trip-actions">
+              <button className="button warm" onClick={start}>
+                {text("resume")} ▸
+              </button>
+              <button className="drive-secondary" onClick={end}>
+                {text("endTrip")}
+              </button>
+            </div>
           </div>
         )}
       </div>
-      {showSignals && (
-        <div className="signal-strip">
-          {(
-            [
-              ["lights", route === "lanes" ? "red" : signals.vehicle],
-              ["opposition", route === "lanes" ? "red" : signals.vehicle],
-              ["walkLight", route === "lanes" ? "red" : signals.walk],
-            ] as const
-          ).map(([key, lampState]) => (
-            <div key={key}>
-              <i className={"lens " + lampState} />
-              <span>
-                {text(key)}
-                <b>{lamp(lampState)}</b>
-              </span>
-            </div>
-          ))}
-          {route === "lanes" && arrowOn(snapshot.elapsed) && (
-            <div>
-              <b>→ {text("arrowGreen")}</b>
-            </div>
-          )}
-        </div>
-      )}
-      <progress
-        aria-label={name}
-        value={Math.min(routeLength, Math.max(0, progress))}
-        max={routeLength}
-      />
       {!available ? (
         <p role="alert">{text("unavailable")}</p>
       ) : phase === "ready" || phase === "ended" ? (
         <div className="drive-brief">
           <div>
-            {field && (
+            {phase === "ready" ? (
+              <p>{text("overview")}</p>
+            ) : (
               <>
-                <p className="urban-sources">
-                  <a href={sources.npa.url}>{ui.source[l]} · NPA ↗</a>
-                  {field.group === "winter" && (
-                    <>
-                      {" "}
-                      ·{" "}
-                      <a href={sources.winter.url}>{text("winterSource")} ↗</a>
-                    </>
-                  )}
+                <h2>{text("tripSummary")}</h2>
+                <p>
+                  {text("travelled")} · {snapshot.distance} m<br />
+                  {text("incidents")} · {snapshot.incidents}
                 </p>
-                {phase === "ready" && (
-                  <ol>
-                    {field.stages.map((t) => (
-                      <li key={t}>{tasks[t][l]}</li>
+                {snapshot.skills.length > 0 && (
+                  <ul>
+                    {snapshot.skills.map((k) => (
+                      <li key={k}>{skillText[k][l]}</li>
                     ))}
-                  </ol>
+                  </ul>
                 )}
               </>
             )}
-            {urban && (
-              <p className="urban-sources">
-                <a href="https://laws.e-gov.go.jp/law/335CO0000000270">
-                  {text("signalSource")} ↗
-                </a>{" "}
-                ·{" "}
-                <a href="https://laws.e-gov.go.jp/law/335AC0000000105">
-                  {text("law")} ↗
-                </a>
-                {route === "snow" && (
-                  <>
-                    {" "}
-                    · <a href={sources.winter.url}>{text("winterSource")} ↗</a>
-                  </>
-                )}
-                · <a href={sources.npa.url}>{text("yieldSource")} ↗</a>
-              </p>
-            )}
-            {phase === "ended" && (
-              <h2>
-                {text(snapshot.result === "complete" ? "complete" : "ended")}
-              </h2>
-            )}
-            <p>
-              {phase === "ready"
-                ? field
-                  ? fieldGroups[field.group][l]
-                  : district
-                    ? district.brief[l]
-                    : text("brief")
-                : text(
-                    snapshot.result === "complete"
-                      ? field
-                        ? "fieldSuccess"
-                        : urban
-                          ? "urbanSuccess"
-                          : "success"
-                      : (snapshot.result ?? "ended"),
-                  )}
-            </p>
-            {phase === "ended" &&
-              rule &&
-              ["yield", "lane", "stop"].includes(snapshot.result ?? "") && (
-                <a className="drive-source" href={sources[rule.source].url}>
-                  {ui.source[l]} · {rule.name[l]} ↗
-                </a>
-              )}
           </div>
-          {phase === "ended" && (
-            <div className="drive-review">
-              <h3>{text("timeline")}</h3>
-              <ol>
-                {snapshot.events.map((e) => (
-                  <li key={e.key}>
-                    <time>{e.time.toFixed(1)} s</time> {eventText[e.key][l]}
-                  </li>
-                ))}
-                <li>
-                  <time>{snapshot.elapsed.toFixed(1)} s</time>{" "}
-                  {text(snapshot.result ?? "ended")}
-                </li>
-              </ol>
-            </div>
-          )}
-          <button className="button" onClick={() => start()}>
-            {text(
-              phase === "ready"
-                ? "start"
-                : route === "avenue"
-                  ? "retrySame"
-                  : "retry",
-            )}{" "}
-            <Icon name="arrow" />
+          <button className="button" onClick={start}>
+            {text(phase === "ready" ? "start" : "retry")} <Icon name="arrow" />
           </button>
-          {route === "avenue" && phase === "ended" && (
-            <button
-              className="drive-secondary"
-              onClick={() => start((snapshot.variant + 1) % 3)}
-            >
-              {text("different")}
-            </button>
-          )}
         </div>
       ) : (
         <>
@@ -583,7 +283,8 @@ function Course({
                 "right",
                 "brake",
                 "gas",
-                ...(urban || field ? (["lookLeft", "lookRight"] as const) : []),
+                "lookLeft",
+                "lookRight",
               ] as const
             ).map((k) => (
               <button
@@ -633,9 +334,11 @@ function Course({
           </div>
         </>
       )}
-      {(field || route === "snow") && <small>{text("coaching")}</small>}
+      {phase === "active" && street.field && (
+        <small>{fieldGroups[street.field.group][l]}</small>
+      )}
       <p className="drive-help">
-        {text("controls")} {(urban || field) && text("lookHelp")}
+        {text("controls")} {text("lookHelp")}
       </p>
     </section>
   );

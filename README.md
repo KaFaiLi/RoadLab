@@ -42,18 +42,6 @@ The app ships all content and artwork locally. Each published item links to its 
 
 ## First-person driving
 
-Choose **3D Driving School** on the dashboard or open `#/drive`. Drive a right-hand-drive car through a 150 m Japanese town course. Follow the left lane, stop before the marked line, let the pedestrian cross and reach the green finish gate. Hold the arrow keys or WASD to steer, accelerate and brake. The on-screen controls support simultaneous steering and pedal input. Pause with Escape or the Pause button. Losing window focus pauses the simulation.
+Choose **3D Driving School** or open `#/drive` and press **Start driving**. Follow the navigation arrows through one continuous trip. Signals, pedestrians, rail crossings, roadworks and turning conflicts appear along the way. The game draws from 49 street layouts in shuffled order, varies encounter spacing and signal timing, and continues into another shuffle when the pool is exhausted.
 
-The town uses original polygon meshes, a moving perspective camera and a Canvas 2D rasterizer. Shadows, traffic and handling are simplified for this introductory course. A completed or failed drive can be replayed and does not affect quiz scores.
-
-### Urban intersections
-
-Use the driving route selector to choose **Market street** (left turn across a pedestrian crossing), **Station road** (right turn across opposing through traffic), or **Civic avenue** (both conflicts in one right turn). Approach, steer through the actual junction and stay on the left of the exit street until the green destination gate. Hold Q or E, or the look buttons, to check the sides. The signal strip identifies the approach, opposing and pedestrian aspects. Traffic and pedestrians move on the simulation clock while the player waits. Pausing freezes the entire scene. Civic avenue continues to a second intersection with a stop sign after the turn. Changing routes while paused starts a fresh attempt.
-
-### Driving lessons and progress
-
-Nine routes are available in the cockpit. New lessons cover a blocked station exit, a shopper emerging behind a delivery van, a cyclist approaching in the left mirror, a designated right-turn lane with a protected arrow, and braking behind a lead vehicle on snow. Civic Avenue offers three fixed, replayable encounter schedules. Select one before starting, repeat the same encounter, or choose the next variation from the result screen.
-
-The decision review shows timed observations, waits and the outcome. The Progress screen counts demonstrated driving skills separately from quiz accuracy. Driving summaries share the existing local export, import and reset controls. Earlier exports remain compatible.
-
-The **3D Driving School** route selector includes 40 three-encounter field drives across eight settings. Choose a route to preview its three decisions in your selected language. Drive using the pedals and steering controls, or use W/S and A/D. Q/E look left and right. Routes can be retried from the debrief, and each result is saved under the selected route.
+Use WASD, the arrow keys or the on-screen pedals and steering. Hold Q or E to look sideways. After an incident, the car stops back on its approach and the trip continues. Escape or **Pause** freezes traffic and controls. Choose **Resume drive** to continue or **End drive** to save the distance, incidents and driving skills in your local history. Driving results are separate from quiz accuracy.
