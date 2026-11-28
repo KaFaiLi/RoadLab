@@ -1,6 +1,6 @@
 import type { FieldDrive } from "../../content/fieldDrives";
 import type { Car } from "./simulation";
-import { checkpoint, fieldFinish, fieldState, fieldX } from "./field";
+import { checkpoint, fieldSignal, fieldState, fieldX } from "./field";
 import { box, face, type Face } from "./world";
 
 export function fieldWorld(d: FieldDrive) {
@@ -86,7 +86,7 @@ export function fieldWorld(d: FieldDrive) {
     }
   }
   d.stages.forEach((task, i) => {
-    const z = checkpoint(i),
+    const z = checkpoint(i, d),
       x = fieldX(d, z);
     if (["side", "stop"].includes(task))
       mesh.push(
@@ -189,17 +189,13 @@ export function fieldWorld(d: FieldDrive) {
         );
       }
   });
-  const end = fieldX(d, fieldFinish);
-  for (const x of [-5.2, 0])
-    mesh.push(...box(end + x, 0, fieldFinish, 0.17, 4, 0.18, "#45745f"));
-  mesh.push(...box(end - 2.6, 3.6, fieldFinish, 5.4, 0.58, 0.22, "#355f50"));
   return mesh;
 }
 
 export function fieldActors(d: FieldDrive, car: Car) {
   const mesh: Face[] = [];
   d.stages.forEach((task, i) => {
-    const z = checkpoint(i),
+    const z = checkpoint(i, d),
       x = fieldX(d, z);
     const age =
       i < car.step
@@ -282,7 +278,8 @@ export function fieldActors(d: FieldDrive, car: Car) {
         ...box(p, 0, z, 0.13, 3, 0.13, "#677671"),
         ...box(p, 2.7, z, 1.6, 0.65, 0.33, "#344343"),
       );
-      for (const side of [-0.5, 0.5])
+      const color = fieldSignal(d, i, car.elapsed, age);
+      for (const side of [-0.5, 0, 0.5])
         mesh.push(
           ...box(
             p + side,
@@ -292,12 +289,16 @@ export function fieldActors(d: FieldDrive, car: Car) {
             0.32,
             0.06,
             side === 0.5
-              ? s.red
+              ? color === "red"
                 ? "#ff604e"
                 : "#703f3a"
-              : s.red
-                ? "#395951"
-                : "#64e6a5",
+              : side === 0
+                ? color === "amber"
+                  ? "#ffbd4b"
+                  : "#645544"
+                : color === "green"
+                  ? "#64e6a5"
+                  : "#395951",
           ),
         );
     }

@@ -1,135 +1,59 @@
 import { test, expect } from "@playwright/test";
-test("enter the cockpit, drive with held controls, pause and resume", async ({
+test("start once, drive, pause, switch language, resume and save one trip", async ({
   page,
 }) => {
   await page.goto("./");
   await page.locator(".language select").selectOption("en");
   await page.getByRole("link", { name: "3D Driving School" }).click();
   await page.reload();
-  await expect(
-    page.getByRole("img", { name: "Driver’s view of the town circuit" }),
-  ).toBeVisible();
+  await expect(page.locator(".driving select")).toHaveCount(0);
   await page.getByRole("button", { name: "Start driving" }).click();
-  const gas = page.getByRole("button", { name: "Accelerate" });
-  const rect = (await gas.boundingBox())!;
+  const gas = page.getByRole("button", { name: "Accelerate" }),
+    rect = (await gas.boundingBox())!;
   await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
   await page.mouse.down();
-  await expect
-    .poll(async () =>
-      Number(await page.locator(".driving progress").getAttribute("value")),
-    )
-    .toBeGreaterThan(3);
+  const distance = () =>
+    page.getByLabel("Distance driven").innerText().then(parseFloat);
+  await expect.poll(distance).toBeGreaterThan(3);
   await page.mouse.up();
-  await page.getByRole("button", { name: /Pause/ }).click();
-  const distance = await page
-    .locator(".driving progress")
-    .getAttribute("value");
-  await page.keyboard.down("ArrowUp");
-  await page.waitForTimeout(180);
-  await page.keyboard.up("ArrowUp");
-  await expect(page.locator(".driving progress")).toHaveAttribute(
-    "value",
-    distance!,
-  );
-  await page.getByRole("button", { name: /Resume drive/ }).click();
-  await page.keyboard.down("KeyW");
-  await expect
-    .poll(async () =>
-      Number(await page.locator(".driving progress").getAttribute("value")),
-    )
-    .toBeGreaterThan(Number(distance) + 0.6);
-  await page.keyboard.up("KeyW");
   await page.keyboard.press("Escape");
-  await expect(
-    page.getByRole("button", { name: /Resume drive/ }),
-  ).toBeVisible();
+  const frozen = await distance();
+  await page.keyboard.down("w");
+  await page.waitForTimeout(200);
+  await page.keyboard.up("w");
+  expect(await distance()).toBe(frozen);
   await page.locator(".language select").selectOption("ja");
-  await expect(
-    page.getByRole("heading", { name: "3Dドライビングスクール" }),
-  ).toBeVisible();
-});
-
-test("select independent urban turns, see matching vehicle and walk greens, and change routes while paused", async ({
-  page,
-}) => {
-  await page.goto("./#/drive");
+  await expect(page.getByRole("button", { name: "運転を再開" })).toBeVisible();
   await page.locator(".language select").selectOption("en");
-  const route = page.getByLabel("Driving route");
-  await route.selectOption("market");
-  await expect(
-    page.getByText("Turn left into the market street."),
-  ).toBeVisible();
-  await route.selectOption("avenue");
-  await expect(
-    page.getByText("Turn right across the opposing lane."),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Start driving" }).click();
-  await expect(route).toBeDisabled();
-  await expect(page.getByRole("button", { name: "Look right" })).toBeVisible();
-  await expect(page.locator(".signal-strip .lens.green")).toHaveCount(3, {
-    timeout: 24000,
-  });
+  await page.getByRole("button", { name: /Resume drive/ }).click();
+  await page.keyboard.down("w");
+  await expect.poll(distance).toBeGreaterThan(frozen + 1);
+  await page.keyboard.up("w");
   await page.getByRole("button", { name: /Pause/ }).click();
-  await route.selectOption("station");
+  await page.getByRole("button", { name: "End drive" }).click();
   await expect(
-    page.getByRole("button", { name: "Start driving" }),
+    page.getByRole("heading", { name: "Trip summary" }),
   ).toBeVisible();
-  await expect(page.locator(".signal-strip .lens.red")).toHaveCount(3);
-});
-
-test("debrief, replay variation and saved driving progress survive navigation and reload", async ({
-  page,
-}) => {
-  await page.goto("./#/drive");
-  await page.locator(".language select").selectOption("en");
-  await page.getByLabel("Driving route").selectOption("avenue");
-  await page.getByLabel("Encounter").selectOption("1");
-  await page.getByRole("button", { name: "Start driving" }).click();
-  await page.keyboard.down("w");
-  await expect(
-    page.getByRole("heading", { name: "Decision review" }),
-  ).toBeVisible({ timeout: 15000 });
-  await page.keyboard.up("w");
-  await page.getByRole("button", { name: "Retry this encounter" }).click();
-  await expect(page.getByLabel("Encounter")).toHaveValue("1");
-  await page.keyboard.down("w");
-  await expect(page.getByRole("heading", { name: "Drive ended" })).toBeVisible({
-    timeout: 15000,
-  });
-  await page.keyboard.up("w");
-  await page
-    .getByRole("button", { name: "Practice another variation" })
-    .click();
-  await expect(page.getByLabel("Encounter")).toHaveValue("2");
+  await page.getByRole("button", { name: "Drive again" }).click();
+  await expect(page.getByRole("button", { name: /Pause/ })).toBeVisible();
   await page.goto("./#/progress");
   await page.reload();
-  await expect(page.getByText("Completed drives · 0 / 2")).toBeVisible();
+  await expect(page.getByText("Completed drives · 1 / 1")).toBeVisible();
 });
-
-test("browse forty grouped drives, read a translated brief and drive into a closed railway crossing", async ({
+test("a missed railway stop gives feedback and keeps the driving controls live", async ({
   page,
 }) => {
-  await page.goto("./#/drive");
-  const locale = page.locator(".language select"),
-    route = page.locator(".route-select select").first();
-  await locale.selectOption("en");
-  await expect(route.locator("option")).toHaveCount(49);
-  await expect(route.locator("optgroup")).toHaveCount(8);
-  await route.selectOption("field-rail-bus");
-  await expect(page.locator(".drive-brief ol li")).toHaveCount(3);
-  await locale.selectOption("ja");
-  await expect(route.locator("option:checked")).toHaveText(
-    "踏切の先の連絡バス",
-  );
-  await locale.selectOption("en");
-  await page.getByRole("button", { name: "Start driving" }).click();
-  await expect(route).toBeDisabled();
-  await page.keyboard.down("w");
-  await expect(page.getByRole("heading", { name: "Drive ended" })).toBeVisible({
-    timeout: 18000,
+  await page.addInitScript(() => {
+    Math.random = () => 0.68;
   });
+  await page.goto("./#/drive");
+  await page.locator(".language select").selectOption("en");
+  await page.getByRole("button", { name: "Start driving" }).click();
+  await page.keyboard.down("w");
+  await expect(page.locator(".trip-warning")).toBeVisible({ timeout: 18000 });
   await page.keyboard.up("w");
-  await expect(page.locator(".drive-brief")).toContainText(
-    "You passed the stop line",
-  );
+  await expect(page.getByRole("button", { name: "Accelerate" })).toBeEnabled();
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "End drive" }).click();
+  await expect(page.locator(".drive-brief")).toContainText("Incidents · 1");
 });

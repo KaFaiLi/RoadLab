@@ -4,7 +4,8 @@ import { note } from "./encounters";
 import type { Skill } from "../../content/drivingLessons";
 
 export const fieldFinish = 184;
-export const checkpoint = (index: number) => 40 + index * 54;
+export const checkpoint = (index: number, d?: FieldDrive) =>
+  d?.positions?.[index] ?? 40 + index * 54;
 export const fieldX = (d: FieldDrive, z: number) =>
   d.bend * 2 * (1 - Math.cos(z / 24));
 export const fieldGrip = (d: FieldDrive) =>
@@ -45,6 +46,19 @@ export function fieldState(task: Task, age: number) {
     red: age < (task === "portable" ? 11 : 8),
   };
 }
+export function fieldSignal(
+  d: FieldDrive,
+  i: number,
+  time: number,
+  age: number,
+) {
+  const task = d.stages[i];
+  if (d.signalOffset === undefined)
+    return fieldState(task, age).red ? "red" : "green";
+  const phase = (time + d.signalOffset + i * 7) % 36,
+    redEnd = task === "portable" ? 17 : 13;
+  return phase < redEnd ? "red" : phase < 33 ? "green" : "amber";
+}
 const skills: Partial<Record<Task, Skill>> = {
   train: "railStop",
   tracks: "railStop",
@@ -61,6 +75,7 @@ export function fieldDrive(
 ) {
   if (car.result) return;
   const dt = Math.min(0.05, Math.max(0, delta));
+  const previousNose = car.z + 2 * Math.cos(car.yaw);
   car.elapsed += dt;
   advanceVehicle(car, keys, dt, 0.4, fieldGrip(d));
   const nose = car.z + 2 * Math.cos(car.yaw),
@@ -79,7 +94,7 @@ export function fieldDrive(
     if (nose >= fieldFinish) car.result = "complete";
     return;
   }
-  const z = checkpoint(car.step),
+  const z = checkpoint(car.step, d),
     offset = nose - z;
   if (offset < -30 && car.encounterAt === null) return;
   car.encounterAt ??= car.elapsed;
@@ -107,12 +122,24 @@ export function fieldDrive(
     car.result = "crossTraffic";
     return;
   }
-  if ((task === "portable" || task === "red") && offset > 0 && state.red) {
-    car.result = "red";
-    return;
+  if (task === "portable" || task === "red") {
+    const signal = fieldSignal(d, car.step, car.elapsed, age);
+    if (
+      signal === "amber" &&
+      fieldSignal(d, car.step, car.elapsed - dt, age - dt) !== "amber"
+    )
+      car.amberPass =
+        z - previousNose <
+        car.speed * 0.7 + car.speed ** 2 / (14 * fieldGrip(d));
+    if (!car.entered && offset > 0) {
+      if (signal === "red" || (signal === "amber" && !car.amberPass)) {
+        car.result = signal;
+        return;
+      }
+      car.entered = true;
+    }
+    if (halted && signal === "red") note(car, "lightWait");
   }
-  if (halted && (task === "portable" || task === "red") && state.red)
-    note(car, "lightWait");
   if (halted && (task === "stop" || task === "side")) note(car, "sideStop");
   if (halted && state.people.length && age < 12) note(car, "walkWait");
   if (
@@ -181,6 +208,8 @@ export function fieldDrive(
   if (offset >= 14) {
     const key = skills[task];
     if (key) note(car, key);
+    car.entered = false;
+    car.amberPass = false;
     car.step++;
     car.encounterAt = null;
     car.stopped = false;

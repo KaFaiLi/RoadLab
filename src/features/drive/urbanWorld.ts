@@ -157,11 +157,6 @@ export function urbanWorld(id: UrbanId) {
         0.76,
       ),
     );
-  const exitZ = J + cfg.turn * 3,
-    exitX = cfg.turn * junction.finish;
-  for (const end of [-1, 1])
-    mesh.push(...box(exitX, 0, exitZ + end * 2.75, 0.18, 3.8, 0.16, "#3a6d61"));
-  mesh.push(...box(exitX, 3.5, exitZ, 0.23, 0.5, 5.66, "#377965"));
   // Four city blocks frame the open junction. Street-facing shop bays rotate with the road.
   for (const axis of [0, 1])
     for (const side of [-1, 1])

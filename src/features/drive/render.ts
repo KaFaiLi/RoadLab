@@ -1,10 +1,10 @@
-import { course, pedestrianX, roadX, type Car } from "./simulation";
-import { box, type Face, type V } from "./world";
+import { course, roadX, type Car } from "./simulation";
+import { townPedestrian, type Face, type V } from "./world";
 import { urbanActors } from "./urbanWorld";
 import { junction, type RouteId } from "./urban";
 import type { FieldDrive } from "../../content/fieldDrives";
 import { fieldActors } from "./fieldWorld";
-import { fieldX, checkpoint, fieldFinish } from "./field";
+import { fieldX, checkpoint } from "./field";
 type Point = [number, number];
 function polygon(ctx: CanvasRenderingContext2D, p: Point[], color: string) {
   ctx.beginPath();
@@ -23,21 +23,22 @@ export function render(
   look = 0,
   mirror = false,
   field?: FieldDrive,
+  weather = field?.weather,
 ) {
   const sky = ctx.createLinearGradient(0, 0, 0, h * 0.62);
   sky.addColorStop(
     0,
-    field?.weather === "dusk"
+    weather === "dusk"
       ? "#696782"
-      : field && ["fog", "snow", "rain", "ice"].includes(field.weather)
+      : weather && ["fog", "snow", "rain", "ice"].includes(weather)
         ? "#95a8b2"
         : "#78b4c7",
   );
   sky.addColorStop(
     1,
-    field?.weather === "dusk"
+    weather === "dusk"
       ? "#dfae8b"
-      : field && field.weather !== "clear"
+      : weather && weather !== "clear"
         ? "#dce5e6"
         : "#fae9c7",
   );
@@ -87,25 +88,10 @@ export function render(
     ctx.fillStyle = "#fff9e8";
     ctx.fillText(text, sx, sy);
   }
-  function townPedestrian() {
-    const px = pedestrianX(car),
-      pz = course.crossing + 0.4,
-      walk =
-        car.pedTime > 0 && car.pedTime < 5
-          ? Math.sin(car.pedTime * 8) * 0.16
-          : 0;
-    return [
-      ...box(px, 0.83, pz, 0.44, 0.58, 0.29, "#c36f43"),
-      ...box(px, 1.41, pz, 0.27, 0.29, 0.25, "#d8aa82"),
-      ...box(px, 1.65, pz, 0.3, 0.095, 0.27, "#514c42"),
-      ...box(px - 0.12 - walk, 0, pz, 0.15, 0.84, 0.19, "#455764"),
-      ...box(px + 0.12 + walk, 0, pz, 0.15, 0.84, 0.19, "#455764"),
-    ];
-  }
   const actors = field
     ? fieldActors(field, car)
     : route === "town"
-      ? townPedestrian()
+      ? townPedestrian(car)
       : urbanActors(route, car);
   const faces: { p: Point[]; depth: number; color: string; layer: number }[] =
     [];
@@ -116,6 +102,14 @@ export function render(
     )
       continue;
     const vertices = item.v.map(camera);
+    const slope = w / (2 * focal);
+    if (
+      vertices.every(([, , z]) => z < 0.35) ||
+      vertices.every(([, , z]) => z > 125) ||
+      vertices.every(([x, , z]) => x > z * slope) ||
+      vertices.every(([x, , z]) => x < -z * slope)
+    )
+      continue;
     const clipped: V[] = [];
     for (let i = 0; i < vertices.length; i++) {
       const a = vertices[i],
@@ -149,9 +143,9 @@ export function render(
   for (const f of faces) {
     polygon(ctx, f.p, f.color);
     if (
-      route === "snow" ||
-      field?.weather === "fog" ||
-      field?.weather === "snow"
+      (!weather && route === "snow") ||
+      weather === "fog" ||
+      weather === "snow"
     ) {
       ctx.globalAlpha = Math.min(0.94, Math.max(0, (f.depth - 7) / 44));
       polygon(ctx, f.p, "#e0e8eb");
@@ -162,7 +156,7 @@ export function render(
   if (route === "lanes" && car.z < 17) label(-3, 4.64, 16.85, "↑　　　 →", 0.5);
   if (field) {
     field.stages.forEach((task, i) => {
-      const z = checkpoint(i),
+      const z = checkpoint(i, field),
         x = fieldX(field, z) - 5.45;
       if (task.startsWith("limit")) {
         const p = camera([x, 2.54, z - 0.03]);
@@ -178,16 +172,8 @@ export function render(
       else if (task === "train" || task === "tracks" || task === "deer")
         label(x, 2.57, z - 0.02, task === "deer" ? "鹿" : "×", 0.46);
     });
-    label(
-      fieldX(field, fieldFinish) - 2.6,
-      3.77,
-      fieldFinish - 0.13,
-      "ROADLAB",
-      0.31,
-    );
   } else if (route === "town") {
     label(roadX(course.stop) - 4.95, 2.82, course.stop - 0.06, "止まれ", 0.24);
-    label(roadX(course.finish), 3.78, course.finish - 0.11, "ROADLAB", 0.36);
   }
   if (route !== "town") {
     if (car.z < 20)
@@ -341,6 +327,8 @@ export function render(
       route,
       Math.PI + 0.16,
       true,
+      undefined,
+      weather,
     );
     ctx.restore();
   }

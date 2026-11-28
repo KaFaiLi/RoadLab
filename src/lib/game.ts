@@ -25,6 +25,7 @@ export type Attempt = z.infer<typeof attemptSchema>;
 const driveRecordSchema = z.object({
   route: z
     .enum([
+      "journey",
       "town",
       "market",
       "station",
@@ -38,6 +39,8 @@ const driveRecordSchema = z.object({
     .or(z.string().refine((id) => fieldById.has(id))),
   variant: z.number().int().min(0).max(2),
   completed: z.boolean(),
+  distance: z.number().nonnegative().optional(),
+  incidents: z.number().int().nonnegative().optional(),
   at: z.number(),
   skills: z.array(z.enum(Object.keys(skillText) as [Skill, ...Skill[]])),
 });

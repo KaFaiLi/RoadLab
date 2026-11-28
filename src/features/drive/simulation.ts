@@ -17,6 +17,7 @@ export const neutral = (): Controls => ({
   right: false,
 });
 export type Result =
+  | "trafficContact"
   | "crossTraffic"
   | "railGate"
   | "cones"
