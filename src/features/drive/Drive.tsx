@@ -131,7 +131,11 @@ export default function Drive({
             Number(inputs.has("lookLeft")) -
             look) *
           Math.min(1, dt * 10);
-        advanceJourney(session.current, keys, dt, look);
+        // Keep braking and actor motion in sync when a mobile frame runs long.
+        const elapsed = Math.min(0.25, dt),
+          steps = Math.max(1, Math.ceil(elapsed / 0.05));
+        for (let i = 0; i < steps; i++)
+          advanceJourney(session.current, keys, elapsed / steps, look);
         if (time - reported > 95) {
           setSnapshot(view());
           reported = time;

@@ -102,6 +102,14 @@ export function render(
     )
       continue;
     const vertices = item.v.map(camera);
+    const slope = w / (2 * focal);
+    if (
+      vertices.every(([, , z]) => z < 0.35) ||
+      vertices.every(([, , z]) => z > 125) ||
+      vertices.every(([x, , z]) => x > z * slope) ||
+      vertices.every(([x, , z]) => x < -z * slope)
+    )
+      continue;
     const clipped: V[] = [];
     for (let i = 0; i < vertices.length; i++) {
       const a = vertices[i],
